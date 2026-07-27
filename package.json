@@ -1,0 +1,44 @@
+{
+  "name": "fsu25d-systemutveckling-uppgift-1-min-egna-e-handel-harald-wallin",
+  "version": "1.0.0",
+  "description": "E-commerce platform for previewing and purchasing beats",
+  "type": "module",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev:server": "nodemon server.js",
+    "dev:client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "npm run build --prefix client",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+    
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Medieinstitutet/fsu25d-systemutveckling-uppgift-1-min-egna-e-handel-Harald-Wallin.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Medieinstitutet/fsu25d-systemutveckling-uppgift-1-min-egna-e-handel-Harald-Wallin/issues"
+  },
+  "homepage": "https://github.com/Medieinstitutet/fsu25d-systemutveckling-uppgift-1-min-egna-e-handel-Harald-Wallin#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.4",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.9.6"
+  }
+}
