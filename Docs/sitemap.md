@@ -163,7 +163,7 @@ Home ("/")
             Order Details ("account/orders/:orderId")
 
 ## ...eller 'Admin'
-Admin ("/Admin")
+Admin ("/admin")
     Manage Albums ("/admin/albums")
         Create Album ("/admin/albums/new")
         Edit Album ("/admin/albums/:albumId/edit")
