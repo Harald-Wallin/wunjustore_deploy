@@ -23,18 +23,18 @@
 * 
 
 ## Projekt
-* Bygga API (albums, products, orders): ....................HELDAG
-* Bygga CRUD-API (get, post, put, delete): .................HALVDAG
+* Bygga API (albums, products, orders): ....................2x HELDAG
+* Bygga CRUD-API (get, post, put, delete): .................HELDAG
 * Bygga generella komponenter(header, footer, navbar osv): .HELDAG
 * Bygga routes: HALVDAG
 * Bygga BrowseMusic (Album-lista): .........................HALVDAG
-* Bygga TrackList (visa beats, previewknappar): ............HALVDAG
+* Bygga TrackList (visa beats, previewknappar): ............HELDAG
 * Bygga Cart (add, remove, total): .........................HALVDAG
 * Bygga Checkout (Form, validation, POST > API): ...........HELDAG?
 * Bygga isAdmin-state: .....................................HELDAG?
-* Bygga Login: .............................................HELDAG (dålig koll på denna)
+* Bygga Login: .............................................x2 HELDAG (dålig koll på denna)
 
-* Förfining av projekt: ....................................HELDAG x2
+* Förfining av projekt: ....................................x2 HELDAG
 
 ## Dokumentation
 * Skriva ordentlig README (projektdokumentation): ...........HALVDAG
