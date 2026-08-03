@@ -10,7 +10,7 @@
 -Redigera eventuella nyheter / kampabjer
 
 
-### BrowseMusicPage ("albums") (åtkomst: alla)
+### BrowseMusicPage ("/albums") (åtkomst: alla)
 -Hämta och visa samtliga album
 -Visa albumomslag, namn och eventuell information
 -Länka till respektive albums TrackListPage
@@ -46,7 +46,7 @@
 -Länka till CheckoutPage
 
 
-### CheckoutPage ("checkout") (åtkomst: kund)
+### CheckoutPage ("/checkout") (åtkomst: kund)
 -Visa orderöversikt
 -Visa totalpris
 -Bekräfta kunduppgifter
@@ -55,7 +55,7 @@
 -Navigera till orderbekräftelsen
 
 
-### OrderConfirmationPage ("orders/:orderId/confirmation") (åtkomst: kund (den som skapade ordern))
+### OrderConfirmationPage ("/orders/:orderId/confirmation") (åtkomst: kund (den som skapade ordern))
 -Bekräfta att ordern skapades
 -Visa tackmeddelande
 -Visa ordernummer
@@ -175,7 +175,7 @@ Admin ("/Admin")
     View Orders ("/admin/orders")
         Order Details ("admin/orders/:orderId")
 
-    Edit About ("admin/about")
+    Edit About ("/admin/about")
 
 
 ## Gemensam navigation
