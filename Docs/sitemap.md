@@ -38,7 +38,7 @@
 ### Adminfunktioner
 -Visa redigeringsalternativ
 
-### CartPage ("/cart") (åtkomst: kund)
+### CartPage ("/cart") (åtkomst: alla)
 -Visa beats i varukorgen
 -Ta bort beats från varukorgen
 -Förhindra dubletter
@@ -88,7 +88,7 @@
 -Länka till orderdetaljer
 
 
-### CustomerOrderDetailsPage ("/account/orders/:orderId")
+### CustomerOrderDetailsPage ("/account/orders/:orderId") (åtkomst: kund(som äger ordern))
 -Visa en specifik order
 -Visa samtliga köpta beats
 -Visa pris och orderdatum
@@ -101,7 +101,7 @@
 -Eventuellt ta bort album
 
 
-### AlbumEditorPage ("admin/albums/:albumId/edit") (åtkomst: admin)
+### AlbumEditorPage ("/admin/albums/:albumId/edit") (åtkomst: admin)
 -Redigera albumets namn, pris och omslag
 -Visa albumets beats
 -Lägga till beats
@@ -115,7 +115,7 @@
 -Spara beatet i databasen
 
 
-### AdminOrdersPage ("admin/orders") (åtkomst: admin)
+### AdminOrdersPage ("/admin/orders") (åtkomst: admin)
 -Visa samtliga ordrar
 -Visa kund, datum och totalsumma
 -Länka till orderdetaljer
@@ -127,15 +127,30 @@
 -Visa priset vid köptillfället
 -Visa orderns totalsumma
 
+### BeatEditPage ("/admin/beats/:beatId/edit") (åtkomst: admin)
+-Hämta befintligt beat
+-Visa beatets nuvarande information
+-Redigera namn, pris, album och preview
+-Validera formuläret
+-Spara ändringarna i databasen
+
+### CreateAlbumPage ("/admin/album/new") (åtkomst: admin)
+-Visa formulär för ett nytt album
+-Ange albumnamn
+-Ange albumpris
+-Ange albumomslag
+-Validera formuläret
+-Spara albumet i databasen
+-Navigera till AlbumEditorPage efter att albumet skapats
 
 ## Route protection
-Routes som kräver login ska skyddas av en route-komponent.
+Routes som kräver login ska skyddas av en route-komponent
 
 ### RequireAuth
-Skyddar routes som kräver en inloggad användare.
+Skyddar routes som kräver en inloggad användare
 
 ### RequireAdmin
-Skyddar routes som kräver rollen `admin`.
+Skyddar routes som kräver rollen "admin"
 
 
 ## Sitemap
@@ -149,11 +164,13 @@ Webbplatsen kommer ha tre möjliga användarstates:
 
 Home ("/")
     Browse Music ("/albums")
-        Album tracklist ("albums/:albumID")
+        Album tracklist ("/albums/:albumID")
 
     About("/about")
 
-    Login ("/Login")
+    Cart ("/cart")
+
+    Login ("/login")
 
 ## Ytterligare routes, inloggad 'Kund'...
 
@@ -164,18 +181,14 @@ Home ("/")
 
 ## ...eller 'Admin'
 Admin ("/admin")
-    Manage Albums ("/admin/albums")
-        Create Album ("/admin/albums/new")
-        Edit Album ("/admin/albums/:albumId/edit")
-
-    Manage Beats ("admin/beats")
-        Create Beat ("/admin/beats/new")
-        Edit Beat ("admin/beats/:beatId/edit")
+    Create Album ("/admin/albums")
+    Edit Album ("/admin/album:Id/edit")
+        Create beat ("/admin/albums/new")
+        Edit beat ("/admin/albums/:albumId/edit")
 
     View Orders ("/admin/orders")
         Order Details ("admin/orders/:orderId")
 
-    Edit About ("/admin/about")
 
 
 ## Gemensam navigation
@@ -184,21 +197,24 @@ Admin ("/admin")
 -Home
 -Browse Music
 -About
+-Cart
 -Login
+
 
 ### Kund
 -Home
 -Browse Music
 -About
+-cart
 -My account/My profile
--Cart
 -Logout (kommer eventuellt istället finnas i My account-sidan)
 
 ### Admin(istratör)
 -Home
 -Browse Music (editable)
+-Manage Albums
 -About (editable)
 -Orders
-
+-Logout
 
 
