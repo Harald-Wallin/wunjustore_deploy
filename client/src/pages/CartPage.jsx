@@ -1,10 +1,8 @@
-function LoginPage(){
-    return(
-        <section>
-            <h1>Login</h1>
-            <p>Login funktionalitet senare</p>
-        </section>
-    )
+function CartPage(){
+    <section>
+        <h1>Cart</h1>
+        <p> Här kommer cart-funktionalitet visas</p>
+    </section>
 };
 
-export default LoginPage;
+export default CartPage;
