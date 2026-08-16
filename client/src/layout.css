@@ -1,0 +1,79 @@
+/*TILLFÄLLIG, AI-GENERERAD CSS*/
+
+.app-layout {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.site-header {
+  border-bottom: 1px solid #333333;
+}
+
+.site-header_div {
+  width: min(1200px, calc(100% - 2rem));
+  min-height: 80px;
+
+  margin-inline: auto;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.site-header__logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.navbar__list {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  list-style: none;
+}
+
+.navbar__link {
+  text-decoration: none;
+  opacity: 0.7;
+}
+
+.navbar__link:hover {
+  opacity: 1;
+}
+
+.navbar__link--active {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.app-layout__main {
+  width: min(1200px, calc(100% - 2rem));
+
+  margin-inline: auto;
+  padding-block: 3rem;
+
+  flex: 1;
+}
+
+.site-footer {
+  border-top: 1px solid #333333;
+}
+
+.site-footer__div {
+  width: min(1200px, calc(100% - 2rem));
+
+  min-height: 100px;
+  margin-inline: auto;
+
+  display: flex;
+  align-items: center;
+}
