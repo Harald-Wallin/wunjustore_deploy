@@ -85,7 +85,7 @@ I projektet estimerar jag att jag kommer använda:
 
 Grundversionen ska stödja en kort ljudpreview för varje beat.
 
-Som en senare extrafunktion planeras en global radio som spelar slumpmässiga beats. När användaren spelar en specifik preview ska radion tonas ned och previewn tonas upp. När previewn slutar ska radion kunna återupptas.
+Som en senare extrafunktion planeras en global radio som spelar slumpmässiga beats från alla album. När användaren spelar en specifik preview ska radion tonas ned och previewn tonas upp. När previewn slutar ska radion kunna återupptas.
 
 
 ## Saker jag vill hinna med nu eller vid fortsatt utveckling:
