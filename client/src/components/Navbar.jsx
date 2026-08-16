@@ -4,7 +4,7 @@ import {NavLink} from "react-router-dom";
 //Jag använder NavLink (ej "link") för att senare kunna MARKERA vilken sida som användaren står på just nu.
 // UX!
 
-function NavBar(){
+function Navbar(){
     return(
         <nav aria-label="Main navigation">
             <ul className="navbar_list">
@@ -14,19 +14,19 @@ function NavBar(){
                 </li>
 
                 <li>
-                    <Navlink to="/albums">Browse Music</Navlink>
+                    <NavLink to="/albums">Browse Music</NavLink>
                 </li>
 
                 <li>
-                    <Navlink to="/about">About</Navlink>
+                    <NavLink to="/about">About</NavLink>
                 </li>
 
                 <li>
-                    <Navlink to="/cart">Cart</Navlink>
+                    <NavLink to="/cart">Cart</NavLink>
                 </li>
 
                 <li>
-                    <Navlink to="/Login">Login</Navlink>
+                    <NavLink to="/Login">Login</NavLink>
                 </li>
             </ul>
         </nav>

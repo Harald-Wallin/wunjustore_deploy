@@ -1,4 +1,4 @@
-import {link} from "react-router-dom";
+import {Link} from "react-router-dom";
 import Navbar from "./Navbar";
 
 //Generell header-komponent med Navbar-komponenten inbakad i sig, men

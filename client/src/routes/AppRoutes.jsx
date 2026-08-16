@@ -1,4 +1,4 @@
-import {Route, Routes} from "rect-router-dom";
+import {Route, Routes} from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 
 //Pages
