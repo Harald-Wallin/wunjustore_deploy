@@ -19,7 +19,7 @@ import ProfilePage from "../pages/ProfilePage";
 
 //admin-pages
 import AdminAlbumsPage from "../pages/AdminAlbumsPage";
-importAdminOrderDetailsPage from "../pages/AdminOrderDettailsPage";
+import AdminOrderDetailsPage from "../pages/AdminOrderDettailsPage";
 import CreateAlbumPage from "../pages/CreateAlbumPage";
 import EditBeatPage from "../pages/EditBeatPage";
 import AdminOrdersPage from "../pages/AdminOrdersPage";
@@ -54,9 +54,9 @@ function AppRoutes(){
                 <Route path="admin/albums/new" element={<CreateAlbumPage />} />
                 <Route path="admin/albums/:albumId/edit" element={<AlbumEditorPage />} />
                 <Route path="admin/beats/new" element={<BeatCreatePage />} />
-                <Route path="admin/beats/beatId/edit" element={<EditBeatPage />} />
+                <Route path="admin/beats/:-beatId/edit" element={<EditBeatPage />} />
                 <Route path="admin/orders" element={<AdminOrdersPage />} />
-                <Route path="admin/orders/:orderId" element={<AdminOrderDetailsPAge />} />
+                <Route path="admin/orders/:orderId" element={<AdminOrderDetailsPage />} />
 
             </Route>
         </Routes>
