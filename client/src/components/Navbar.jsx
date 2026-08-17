@@ -26,7 +26,7 @@ function Navbar(){
                 </li>
 
                 <li>
-                    <NavLink to="/Login">Login</NavLink>
+                    <NavLink to="/login">Login</NavLink>
                 </li>
             </ul>
         </nav>
