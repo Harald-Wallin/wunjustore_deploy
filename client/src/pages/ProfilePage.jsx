@@ -6,3 +6,5 @@ function ProfilePage(){
         </section>
     );
 };
+
+export default ProfilePage;
