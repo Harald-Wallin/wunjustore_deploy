@@ -12,7 +12,7 @@ const mockAlbums = [
         albumName: "The Green",
         albumPrice: 99,
         releaseYear: 2021,
-        coverImage: "/images/theGreen.jsg",
+        coverImage: "/images/theGreen.jpg",
         description: "ett till test"
     }
 ];

@@ -1,6 +1,9 @@
 import AlbumCard from "../components/AlbumCard";
 import mockAlbums from "../data/mockAlbums";
 
+//styling
+import "../album.css";
+
 function BrowseMusicPage(){
     return(
         <section>

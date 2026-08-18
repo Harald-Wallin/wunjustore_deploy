@@ -1,0 +1,51 @@
+.album-list {
+  display: grid;
+  gap: 2rem;
+}
+
+.album-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) 1fr;
+  gap: 2rem;
+
+  padding-block: 2rem;
+
+  border-bottom: 1px solid #333333;
+}
+
+.album-card_cover-link {
+  display: block;
+}
+
+.album-card_cover {
+  width: 100%;
+  aspect-ratio: 1;
+
+  object-fit: cover;
+
+  background-color: #222222;
+}
+
+.album-card_content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.album-card_content h2 {
+  margin-top: 0;
+}
+
+.album-card_actions {
+  margin-top: auto;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 650px) {
+  .album-card {
+    grid-template-columns: 1fr;
+  }
+}
