@@ -54,7 +54,7 @@ function AppRoutes(){
                 <Route path="admin/albums/new" element={<CreateAlbumPage />} />
                 <Route path="admin/albums/:albumId/edit" element={<AlbumEditorPage />} />
                 <Route path="admin/beats/new" element={<CreateBeatPage />} />
-                <Route path="admin/beats/:-beatId/edit" element={<EditBeatPage />} />
+                <Route path="admin/beats/:beatId/edit" element={<EditBeatPage />} />
                 <Route path="admin/orders" element={<AdminOrdersPage />} />
                 <Route path="admin/orders/:orderId" element={<AdminOrderDetailsPage />} />
 
