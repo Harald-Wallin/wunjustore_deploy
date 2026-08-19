@@ -1,15 +1,17 @@
 import {Link, useParams} from "react-router-dom";
+
 import mockAlbums from "../data/mockAlbums";
+import BeatList from "../components/BeatList";
 
 function TrackListPage(){
 
     const {albumId}=useParams();
 
     const album = mockAlbums.find(
-        (album) => album.id == Number(albumId)
+        (currentAlbum) => currentAlbum.id == Number(albumId)
     );
 
-    {/*Litet "säkerhetsuppfång" ifal */}
+    {/*Litet catch */}
     if(!album){
         return(
             <section>
@@ -34,7 +36,7 @@ function TrackListPage(){
             </button>
 
             <h2>Tracks</h2>
-            <p>förhoppningsvis en riktig lista här snart</p>
+            <BeatList beats={album.beats} />
         </section>
     );
 };

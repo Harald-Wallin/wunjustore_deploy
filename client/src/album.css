@@ -49,3 +49,46 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/*Beats*/
+
+.beat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.beat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+
+  padding: 1rem;
+
+  border-bottom: 1px solid #333333;
+}
+
+.beat-row_info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.beat-row_info h3 {
+  margin: 0;
+}
+
+.beat-row_actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 650px) {
+  .beat-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
