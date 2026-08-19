@@ -18,7 +18,7 @@
 }
 
 .album-card_cover {
-  width: 100%;
+  width: 25%;
   aspect-ratio: 1;
 
   object-fit: cover;
