@@ -11,8 +11,8 @@ function BrowseMusicPage(){
             
             {/*.map går här igenom mockAlbums-arrayen och skapar ett AlbumCard per objekt */}
             <div>
-                {mockAlbums.map((album)=>(
-                    <AlbumCard key={album.id} album={album} />
+                {mockAlbums.map((currentAlbum)=>(
+                    <AlbumCard key={currentAlbum.id} album={currentAlbum} />
                 ))};
             </div>
         </section>
