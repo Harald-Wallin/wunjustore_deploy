@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 
 function AlbumCard({album}){
     return(
-        <article>
-            <Link to={`albums/${album.id}`} className="album-card_cover-link">
+        <article className="album-card_browse">
+            <Link to={`${album.id}`} className="album-card_cover-link">
                 <img src={album.coverImage} alt={`Cover for ${album.albumName}`}
                     className="album-card_cover"
                 />
@@ -16,7 +16,7 @@ function AlbumCard({album}){
                 <p>{album.price}</p>
 
                 <div className="album-card_actions">
-                    <Link to={`/albums/${album.id}`}>
+                    <Link to={`${album.id}`}>
                         Browse Beats
                     </Link>
 

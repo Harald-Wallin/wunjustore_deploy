@@ -9,7 +9,7 @@ function BeatRow({beat}){
                     Preview
                 </button>
 
-                <p>Price: {beat.price}</p>
+                <p>Price: {beat.beatPrice}</p>
                 <button type="button">
                     Add to cart
                 </button>

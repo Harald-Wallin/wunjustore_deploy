@@ -11,7 +11,7 @@ function BeatList({beats}){
         <div className="beat-list">
             {beats.map((currentBeat) => (
                 <BeatRow key={currentBeat.id} beat={currentBeat} />
-            ))};
+            ))}
         </div>
     );
 };

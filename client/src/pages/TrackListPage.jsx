@@ -23,17 +23,19 @@ function TrackListPage(){
 
     return(
         <section>
-            <h1>{album.albumName}</h1>
+            <div className="album-details_div">
+                <h1>{album.albumName}</h1>
 
-            <img src={album.coverImage} alt={`Cover for ${album.albumName}`} />
+                <img className="album-details_cover" src={album.coverImage} alt={`Cover for ${album.albumName}`} />
 
-            <p>{album.description}</p>
-            <p>{album.releaseYear}</p>
-            <p>Price: {album.albumPrice}</p>
+                <p>{album.description}</p>
+                <p>{album.releaseYear}</p>
+                <p>Price: {album.albumPrice}</p>
 
-            <button type="button">
-                Add to cart
-            </button>
+                <button type="button">
+                    Add to cart
+                </button>
+            </div>
 
             <h2>Tracks</h2>
             <BeatList beats={album.beats} />
