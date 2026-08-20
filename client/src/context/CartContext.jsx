@@ -31,4 +31,21 @@ function CartProvider ({children}) {
         });
     };
 
+
+    /*Remove BEAT*/
+    function removeBeatFromCart(beatId){
+        setCartItems(
+            cartItems.filter((currentbeat =>
+                currentbeat.id !== beatId
+            ))
+        );
+    };
+
+
+    /*Clear cart*/
+    function clearCart(){
+        setCartItems([]);
+    };
+
+    
 };
