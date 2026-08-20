@@ -5,9 +5,11 @@ function BeatRow({beat}){
                 <h3>{beat.beatName}</h3>
             </div>
             <div className="beat-row_actions">
-                <button type="button">
-                    Preview
-                </button>
+
+                <audio controls preload="none" className="preview-player">
+                    <source src={beat.previewUrl} type="audio/mpeg" />
+                    Your browser does not support audio playback.
+                </audio>
 
                 <p>Price: {beat.beatPrice}</p>
                 <button type="button">

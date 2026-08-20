@@ -23,7 +23,7 @@ const mockAlbums = [
                 id: 3,
                 beatName: "Foolas",
                 beatPrice: 9,
-                previewUrl: "/audio/previews/aspirituality/foolas.wav"
+                previewUrl: "/audio/previews/aspirituality/foolas-preview.wav"
             }
         ]
     },
