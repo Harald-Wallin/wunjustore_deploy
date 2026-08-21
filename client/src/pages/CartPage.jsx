@@ -43,9 +43,13 @@ function CartPage(){
                 ))}
             </div>
 
-            {/*Totalbelopp*/}
+            {/*Totalbelopp + Checkout-länk*/}
             <div className="cart-total">
                 <p>Total: {totalPrice} kr</p>
+
+                <Link to="/checkout">
+                    Checkout
+                </Link>
             </div>
         </section>
 
