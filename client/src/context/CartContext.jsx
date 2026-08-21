@@ -81,17 +81,17 @@ function CartProvider ({children}) {
             {children}
         </CartContext.Provider>
     );
+};
 
-    /*städar upp CartContext*/
-    function useCart(){
-        const context = useContext(CartContext);
+/*städar upp CartContext*/
+function useCart(){
+    const context = useContext(CartContext);
 
-        if(!context){
-            throw new Error("useCart must be used inside CartProvider");
-        };
-
-        return context;
+    if(!context){
+        throw new Error("useCart must be used inside CartProvider");
     };
+
+    return context;
 };
 
 export {CartProvider, useCart};
