@@ -9,7 +9,7 @@ function CartPage(){
         clearCart,
         totalPrice
     } = useCart();
-    
+
 
     //Om tom så...
     if(cartItems.length===0){
@@ -27,7 +27,29 @@ function CartPage(){
     return(
         <section>
             <h1>Cart</h1>
+
+            {/*Själva varukorgslistan*/}
+            <div classname="cart-list">
+                {cartItems.map((currentBeat) => (
+                    <article key={currentBeat.id} className="cart-item">
+                        <h2>{currentBeat.beatName}</h2>
+                        <p>{currentBeat.beatPrice} kr</p>
+
+                        <button type="button" 
+                            onClick={()=> removeBeatFromCart(currentBeat.id)}>
+                            Remove
+                        </button>
+                    </article>
+                ))}
+            </div>
+
+            {/*Totalbelopp*/}
+            <div className="cart-total">
+                <p>Total: {totalPrice} kr</p>
+            </div>
         </section>
+
+
     );
 };
 
