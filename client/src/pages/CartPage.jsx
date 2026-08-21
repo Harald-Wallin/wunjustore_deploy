@@ -29,7 +29,7 @@ function CartPage(){
             <h1>Cart</h1>
 
             {/*Själva varukorgslistan*/}
-            <div classname="cart-list">
+            <div className="cart-list">
                 {cartItems.map((currentBeat) => (
                     <article key={currentBeat.id} className="cart-item">
                         <h2>{currentBeat.beatName}</h2>
