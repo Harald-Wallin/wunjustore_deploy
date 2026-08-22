@@ -1,4 +1,5 @@
 import {Link, useParams} from "react-router-dom";
+import {useCart} from "../context/CartContext";
 
 import mockAlbums from "../data/mockAlbums";
 import BeatList from "../components/BeatList";
@@ -6,9 +7,10 @@ import BeatList from "../components/BeatList";
 function TrackListPage(){
 
     const {albumId}=useParams();
+    const {addAlbumToCart} = useCart();
 
     const album = mockAlbums.find(
-        (currentAlbum) => currentAlbum.id == Number(albumId)
+        (currentAlbum) => currentAlbum.id === Number(albumId)
     );
 
     {/*Litet catch */}
@@ -32,8 +34,8 @@ function TrackListPage(){
                 <p>{album.releaseYear}</p>
                 <p>Price: {album.albumPrice}</p>
 
-                <button type="button">
-                    Add to cart
+                <button type="button" onClick={()=> addAlbumToCart(album)}>
+                    Add album to cart
                 </button>
             </div>
 

@@ -40,7 +40,8 @@ function CartProvider ({children}) {
                 )
             );
 
-            return [...currentCartItems, ...newBeats];
+            const updatedCart = [...currentCartItems, ...newBeats];
+            return updatedCart;
         });
     };
 

@@ -1,9 +1,11 @@
 function BeatRow({beat}){
     return(
         <article className="beat-row">
+
             <div className="beat-row_info">
                 <h3>{beat.beatName}</h3>
             </div>
+
             <div className="beat-row_actions">
 
                 <audio controls preload="none" className="preview-player">
@@ -16,6 +18,7 @@ function BeatRow({beat}){
                     Add to cart
                 </button>
             </div>
+
         </article>
     );
 };
