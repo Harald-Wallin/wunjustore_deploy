@@ -1,7 +1,7 @@
 import {Route, Routes} from "react-router-dom";
 import AppLayout from "../layouts/AppLayout";
 
-//Almänna Pages
+//Allmänna Pages
 import AboutPage from "../pages/AboutPage";
 import BrowseMusicPage from "../pages/BrowseMusicPage";
 import CartPage from "../pages/CartPage";
