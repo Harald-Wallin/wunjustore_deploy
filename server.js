@@ -1,6 +1,7 @@
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
+import albumRoutes from "./routes/albumRoutes.js";
 
 const app = express();
 
@@ -21,6 +22,8 @@ app.get("/api/health", (request, response) => {
     message: "Beat Store API is running",
   });
 });
+
+app.use("/api/albums", albumRoutes);
 
 app.use((request, response) => {
   response.status(404).json({
