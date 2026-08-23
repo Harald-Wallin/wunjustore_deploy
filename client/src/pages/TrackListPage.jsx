@@ -1,27 +1,61 @@
-import {Link, useParams} from "react-router-dom";
-import {useCart} from "../context/CartContext";
+import {useParams} from "react-router-dom";
+import {useState, useEffect} from "react";
 
-import mockAlbums from "../data/mockAlbums";
+import {useCart} from "../context/CartContext";
+//import mockAlbums from "../data/mockAlbums";
 import BeatList from "../components/BeatList";
 
 function TrackListPage(){
 
     const {albumId}=useParams();
     const {addAlbumToCart} = useCart();
+    
+    //State
+    const [album, setAlbum] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const album = mockAlbums.find(
-        (currentAlbum) => currentAlbum.id === Number(albumId)
-    );
+    useEffect(() => {
+        async function fetchAlbum(){
+            try{
+                const response = await fetch(`http://localhost:3000/api/albums/${albumId}`);
 
-    {/*Litet catch */}
-    if(!album){
+                if(!response.ok){
+                    throw new Error("could not fetch album");
+                }
+
+                
+                const data = await response.json();
+
+                setAlbum(data);
+            }catch (error){
+                console.error("Failed to fetch album:", error);
+                setError("Could not load album.");
+            }finally{
+                setLoading(false);
+            }
+        };
+
+        fetchAlbum();
+
+    }, [albumId])/* <-- kör effect igen ifall id förändras*/
+
+    if (loading){
+        return(
+            <section>
+                <h1>Loading...</h1>
+            </section>
+        );
+    };
+
+    if(error){
         return(
             <section>
                 <h1>Album not found</h1>
-                <p>The requested album does not exist (yet..?)</p>
+                <h2>{error}</h2>
             </section>
-        )
-    }
+        );
+    };
 
     return(
         <section>
@@ -30,9 +64,8 @@ function TrackListPage(){
 
                 <img className="album-details_cover" src={album.coverImage} alt={`Cover for ${album.albumName}`} />
 
-                <p>{album.description}</p>
                 <p>{album.releaseYear}</p>
-                <p>Price: {album.albumPrice}</p>
+                <p>Price: {album.albumPrice} kr</p>
 
                 <button type="button" onClick={()=> addAlbumToCart(album)}>
                     Add album to cart

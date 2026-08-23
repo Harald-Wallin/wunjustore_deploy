@@ -31,6 +31,15 @@ function BrowseMusicPage(){
         fetchAlbums();
     }, []);
 
+    if (loading){
+        return(
+            <section>
+                <h1>Browse Music</h1>
+                <h2>Loading albums...</h2>
+            </section>
+        )
+    }
+
     if (error){
         return (
             <section>
