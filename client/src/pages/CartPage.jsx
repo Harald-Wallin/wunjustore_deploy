@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom";
 import {useCart} from "../context/CartContext";
-import mockAlbums from "../data/mockAlbums";
+//import mockAlbums from "../data/mockAlbums";
 
 function CartPage(){
 
@@ -31,26 +31,22 @@ function CartPage(){
 
             {/*Själva varukorgslistan*/}
             <div className="cart-list">
-                {cartItems.map((currentBeat) => {
-                    const album = mockAlbums.find(
-                        (currentAlbum) => currentAlbum.id === currentBeat.albumId
-                    );
 
-                {/*Intern extra-return för att vi kör kod innuti map()*/}
-                return(
+                {cartItems.map((currentBeat) => (
+                    /*Intern extra-return för att vi kör kod innuti map()*/
                     <article key={currentBeat.id} className="cart-item">
 
-                        <img className="cart-item_image" src={album?.coverImage} alt="Album Cover" />
+                        <img className="cart-item_image" src={currentBeat.albumCover} alt="Album Cover" />
                         <h2>{currentBeat.beatName}</h2>
-                        <p className="cart-item_price">{currentBeat.beatPrice} kr</p>
+                        <p>{currentBeat.albumName}</p>
+                        <p className="cart-item_price">Price:{currentBeat.beatPrice.toFixed(2)} kr</p>
 
                         <button type="button" 
                             onClick={()=> removeBeatFromCart(currentBeat.id)}>
                             Remove
                         </button>
                     </article>
-                );
-            })};
+                ))};
             </div>
 
             {/*Totalbelopp + Checkout-länk. toFixed = konsant 2 decimaler*/}
