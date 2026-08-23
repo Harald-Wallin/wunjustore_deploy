@@ -1,58 +1,89 @@
 import pool from "../database/db.js";
 
-async function getAllAlbums(){
+async function getAllAlbums() {
 
-    //(Query + att backenden översätter postgreSQL'en till)
-    const result = await pool.query(`
-        SELECT 
-        id,
-        album_name AS "albumName",
-        album_price AS "albumPrice",
-        release_year AS "releaseYear",
-        cover_url AS "coverImage"
-        FROM albums
-        ORDER BY id;
-    `);
-
-    return result.rows;
-}
-
-async function getAlbumById(albumId){
-
-    //hämtar först albumet
+    //hämtar album, konverterar price till float
     const albumResult = await pool.query(`
         SELECT
         id,
         album_name AS "albumName",
-        album_price AS "albumPrice",
+        album_price::float AS "albumPrice",
         release_year AS "releaseYear",
         cover_url AS "coverImage"
         FROM albums
-        WHERE id = $1;`,[albumId]
-    );
-    //..$1 är "parametiserad query" och skyddar mot injections-
-    // användare kan inte ange värde direkt i url?
+        ORDER BY release_year;
+    `);
 
-    if (albumResult.rows.length === 0){
-        return null;
-    }
-
-    //hämtar alla beats från albumet
+    //hämtar beats
     const beatsResult = await pool.query(`
         SELECT
         id,
         beat_name AS "beatName",
         album_id AS "albumId",
-        beat_price AS "beatPrice",
+        beat_price::float AS "beatPrice",
+        preview_url AS "previewUrl"
+        FROM beats
+        ORDER BY id;
+    `);
+
+    const albums = albumResult.rows;
+    const beats = beatsResult.rows;
+
+    //soerterar upp alla beats till respektive album
+    const albumsWithBeats = albums.map((album) => {
+        const albumBeats = beats.filter(
+            (beat) => beat.albumId === album.id
+        );
+
+        return {
+            ...album,
+            beats: albumBeats,
+        };
+    });
+
+    return albumsWithBeats;
+}
+
+
+async function getAlbumById(albumId) {
+    const albumResult = await pool.query(
+        `
+        SELECT
+        id,
+        album_name AS "albumName",
+        album_price::float AS "albumPrice",
+        release_year AS "releaseYear",
+        cover_url AS "coverImage"
+        FROM albums
+        WHERE id = $1;
+        `,[albumId]
+    );
+
+    if (albumResult.rows.length === 0) {
+        return null;
+    }
+
+    const beatsResult = await pool.query(
+        `
+        SELECT
+        id,
+        beat_name AS "beatName",
+        album_id AS "albumId",
+        beat_price::float AS "beatPrice",
         preview_url AS "previewUrl"
         FROM beats
         WHERE album_id = $1
-        ORDER By id;`, [albumId]
+        ORDER BY id;
+        `,[albumId]
     );
 
     const album = albumResult.rows[0];
-    album.beats=beatsResult.rows;
+    album.beats = beatsResult.rows;
 
     return album;
 }
-export {getAllAlbums, getAlbumById};
+
+export {
+    getAllAlbums,
+    getAlbumById
+};

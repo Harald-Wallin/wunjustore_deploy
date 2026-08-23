@@ -13,14 +13,14 @@ function BeatRow({beat}){
                     Your browser does not support audio playback.
                 </audio>
 
-                <p>Price: {beat.beatPrice}</p>
+                <p>Price: {beat.beatPrice.toFixed(2)}</p>
                 <button type="button">
                     Add to cart
                 </button>
             </div>
 
         </article>
-    );
+    )
 };
 
 export default BeatRow;

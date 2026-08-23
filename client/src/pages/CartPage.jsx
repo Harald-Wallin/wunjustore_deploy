@@ -53,9 +53,9 @@ function CartPage(){
             })};
             </div>
 
-            {/*Totalbelopp + Checkout-länk*/}
+            {/*Totalbelopp + Checkout-länk. toFixed = konsant 2 decimaler*/}
             <div className="cart-total">
-                <p>Total: {totalPrice} kr</p>
+                <p>Total: {totalPrice.toFixed(2)} kr</p>
 
                 <Link to="/checkout">
                     Checkout

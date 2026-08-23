@@ -17,8 +17,7 @@ function AlbumCard({album}){
             <div className="album-card_content">
                 <h2>{album.albumName}</h2>
                 <p>{album.releaseYear}</p>
-                <p>{album.description}</p>
-                <p>{album.albumPrice}</p>
+                <p>{album.albumPrice.toFixed(2)}</p>
 
                 <div className="album-card_actions">
                     <Link to={`${album.id}`}>
