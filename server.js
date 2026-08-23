@@ -1,7 +1,10 @@
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
+
+//Routes
 import albumRoutes from "./routes/albumRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 const app = express();
 
@@ -24,6 +27,7 @@ app.get("/api/health", (request, response) => {
 });
 
 app.use("/api/albums", albumRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.use((request, response) => {
   response.status(404).json({
