@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getAllAlbums, getAlbumById, createAlbum} from "../services/albumService.js";
+import { getAllAlbums, getAlbumById, createAlbum, updateAlbum} from "../services/albumService.js";
 
 const router = express.Router();
 
@@ -94,6 +94,65 @@ router.post("/", async (request, response) => {
             message: "Could not create album"
         });
     }
+});
+
+//PUT
+router.put("/:albumId", async (request, response) => {
+    try {
+        const albumId = Number(request.params.albumId);
+
+        const {albumName,albumPrice,releaseYear,coverImage} = request.body;
+
+
+        if (!albumName) {
+            return response.status(400).json({
+                success: false,
+                message: "Album name is required"
+            });
+        };
+
+        if (
+            albumPrice === undefined ||
+            //NaN för pris = undefined/null
+            Number.isNaN(Number(albumPrice))
+        ) {
+            return response.status(400).json({
+                success: false,
+                message: "Valid album price is required"
+            });
+        };
+
+
+        const updatedAlbum = await updateAlbum(
+            albumId,
+            albumName,
+            Number(albumPrice),
+            releaseYear ? Number(releaseYear) : null,
+            coverImage || null
+        );
+
+
+        if (!updatedAlbum) {
+            return response.status(404).json({
+                success: false,
+                message: "Album not found"
+            });
+        }
+
+
+        response.status(200).json({
+            success: true,
+            album: updatedAlbum
+        });
+
+    }catch (error) {
+        console.error("Failed to update album:",error);
+
+        response.status(500).json({
+            success: false,
+            message: "Could not update album"
+        });
+    };
 });
 
 

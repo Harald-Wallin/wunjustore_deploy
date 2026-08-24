@@ -121,4 +121,38 @@ async function createAlbum(albumName,albumPrice,releaseYear,coverImage){
     return result.rows[0];
 };
 
-export { getAllAlbums, getAlbumById, createAlbum};
+
+//update
+async function updateAlbum(albumId,albumName,albumPrice,releaseYear,coverImage){
+    const result = await pool.query(`
+        UPDATE albums
+        SET
+            album_name = $1,
+            album_price = $2,
+            release_year = $3,
+            cover_url = $4
+        WHERE id = $5
+
+        RETURNING
+            id,
+            album_name AS "albumName",
+            album_price::float AS "albumPrice",
+            release_year AS "releaseYear",
+            cover_url AS "coverImage";
+        `,[
+        albumName,
+        albumPrice,
+        releaseYear,
+        coverImage,
+        albumId
+        ]
+    );
+
+    if (result.rows.length === 0) {
+        return null;
+    }
+
+    return result.rows[0];
+}
+
+export { getAllAlbums, getAlbumById, createAlbum, updateAlbum};
