@@ -2,7 +2,7 @@ import pool from "../database/db.js";
 
 async function createOrder(userId, beatIds) {
 
-    //samlar connection för kommande transaction
+    //hämtar kundinfo + ordern
     const client = await pool.connect();
 
     try {
@@ -101,4 +101,70 @@ async function createOrder(userId, beatIds) {
     }
 }
 
-export { createOrder };
+
+async function getOrderById(orderId) {
+
+    const orderResult = await pool.query(`
+        SELECT
+        orders.id,
+        orders.order_total::float AS "orderTotal",
+        orders.created_at AS "createdAt",
+        users.id AS "userId",
+        users.user_name AS "userName",
+        users.user_email AS "userEmail"
+        FROM orders
+        JOIN users
+        ON users.id = orders.user_id
+        WHERE orders.id = $1;
+        `,[orderId]
+    );
+
+    //om ordern inte finns
+    if (orderResult.rows.length === 0) {
+        return null;
+    }
+
+
+    //Hämtar order-items + beat/album-information
+    const itemsResult = await pool.query(`
+        SELECT
+        order_items.beat_id AS "beatId",
+        order_items.unit_price::float AS "unitPrice",
+        beats.beat_name AS "beatName",
+        albums.id AS "albumId",
+        albums.album_name AS "albumName",
+        albums.cover_url AS "albumCover"
+        FROM order_items
+        JOIN beats
+        ON beats.id = order_items.beat_id
+
+        JOIN albums
+        ON albums.id = beats.album_id
+
+        WHERE order_items.order_id = $1
+
+        ORDER BY order_items.id;
+        `,[orderId]
+    );
+
+
+    const orderRow = orderResult.rows[0];
+
+    const order = {
+        id: orderRow.id,
+        orderTotal: orderRow.orderTotal,
+        createdAt: orderRow.createdAt,
+
+        customer: {
+            id: orderRow.userId,
+            name: orderRow.userName,
+            email: orderRow.userEmail
+
+        },items: itemsResult.rows
+    };
+
+
+    return order;
+}
+
+export { createOrder, gotOrderById };
