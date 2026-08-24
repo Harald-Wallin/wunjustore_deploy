@@ -36,7 +36,7 @@ function Navbar(){
 
                 {/*Customer.. */}
                 {currentUser?.role === "customer" && (
-                    <>{/*"< fraktioner(?) för att inte påverka css-parent" */}
+                    <>{/*"< fragment(?) för att inte påverka css-parent" */}
 
                         <li><NavLink to="/cart">Cart</NavLink></li>
 
