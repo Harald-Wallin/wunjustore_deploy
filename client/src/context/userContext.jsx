@@ -20,7 +20,10 @@ const testUsers = {visitor: null,
 function UserProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
 
-    function selectUser(userType) {setCurrentUser(testUsers[userType]);}
+    function selectUser(userType){
+        
+        setCurrentUser(testUsers[userType]);
+    };
 
     const value = {currentUser,selectUser};
 
