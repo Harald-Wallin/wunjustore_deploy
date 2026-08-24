@@ -18,11 +18,37 @@ const testUsers = {visitor: null,
 };
 
 function UserProvider({ children }) {
-    const [currentUser, setCurrentUser] = useState(null);
+
+    //implementerar här "session storage" för fejk-login.
+    // (visste inte att man kunde lägga functions i useState tidigare)
+    const [currentUser, setCurrentUser] = useState(() =>{
+        const savedUserType = sessionStorage.getItem("userType");
+
+        if (!savedUserType){
+            return null;
+        };
+    });
 
     function selectUser(userType){
-        
-        setCurrentUser(testUsers[userType]);
+
+        if (userType === "visitor") {
+            sessionStorage.removeItem("userType");
+            setCurrentUser(null);
+
+            return;
+        };
+
+        const selectedUser = testUser[userType];
+
+        if(!selectedUser){
+            return;
+        };
+
+        sessionStorage.setItem(
+            "userType", usertype
+        );
+
+        setCurrentUser(selectedUser);
     };
 
     const value = {currentUser,selectUser};
