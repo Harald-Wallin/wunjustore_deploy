@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getAllAlbums, getAlbumById } from "../services/albumService.js";
+import { getAllAlbums, getAlbumById, createAlbum} from "../services/albumService.js";
 
 const router = express.Router();
 
@@ -48,8 +48,53 @@ router.get("/:albumId", async (request, response) => {
     };
 });
 
+//POST - SKAPA nytt ALBUM
+router.post("/", async (request, response) => {
+    try {
+
+        const {albumName,albumPrice,releaseYear,coverImage} = request.body;
+
+        //lite null/felinmatnings-uppfång
+        if (!albumName) {
+            return response.status(400).json({
+                success: false,
+                message: "Album name is required"
+            });
+        };
+
+        if (
+            albumPrice === undefined ||
+            Number.isNaN(Number(albumPrice))
+        ) {
+            return response.status(400).json({
+                success: false,
+                message: "Valid album price is required"
+            });
+        };
+
+        //Create album
+        const album = await createAlbum(
+            albumName,
+            Number(albumPrice),
+            releaseYear ? Number(releaseYear) : null,
+            coverImage || null
+        );
 
 
+        response.status(201).json({
+            success: true,
+            album
+        });
+
+    } catch (error) {
+        console.error("Failed to create album:",error);
+
+        response.status(500).json({
+            success: false,
+            message: "Could not create album"
+        });
+    }
+});
 
 
 export default router;
