@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom";
 import Navbar from "./Navbar";
-import { useUser } from "../context/userContext";
+import { useUser } from "../context/UserContext";
 
 //Generell header-komponent med Navbar-komponenten inbakad i sig, men
 //också en länk till "hemsidan" i form av en logga (snart)
@@ -23,7 +23,7 @@ function Header(){
 
                 {/*userState-dropdownmeny */}
                 <div className="userSelector">
-                    
+
                     {/*om currentUser.role inte finns > visitor */}
                     <select value={currentUser?.role == "visitor"}
                         onChange={handleUserChange}>

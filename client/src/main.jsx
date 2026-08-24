@@ -4,6 +4,7 @@ import {BrowserRouter} from "react-router-dom";
 
 import App from "./App";
 import {CartProvider} from "./context/CartContext";
+import { UserProvider } from "./context/UserContext";
 import "./index.css";
 
 //<BrowserRouter och context-providers'erna omsluter här <App> och gör så att den kan använda routingfunktioner
