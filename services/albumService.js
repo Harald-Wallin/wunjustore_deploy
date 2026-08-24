@@ -92,7 +92,33 @@ async function getAlbumById(albumId) {
     return album;
 }
 
-export {
-    getAllAlbums,
-    getAlbumById
+//skapar album
+async function createAlbum(albumName,albumPrice,releaseYear,coverImage){
+
+    const result = await pool.query(`
+        INSERT INTO albums (
+            album_name,
+            album_price,
+            release_year,
+            cover_url
+        )
+        VALUES ($1, $2, $3, $4)
+
+        RETURNING
+            id,
+            album_name AS "albumName",
+            album_price::float AS "albumPrice",
+            release_year AS "releaseYear",
+            cover_url AS "coverImage";
+        `,
+        [albumName,
+        albumPrice,
+        releaseYear,
+        coverImage
+        ]
+    );
+
+    return result.rows[0];
 };
+
+export { getAllAlbums, getAlbumById, createAlbum};

@@ -21,7 +21,7 @@ function BeatRow({beat}){
 
                 <audio controls preload="none" className="preview-player">
                     <source src={beat.previewUrl} type="audio/wav" />
-                    Your browser does not support audio playback.
+                    Your browser does not support audio playback ):
                 </audio>
 
                 <p>Price: {beat.beatPrice.toFixed(2)}</p>
