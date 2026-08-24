@@ -27,6 +27,8 @@ function UserProvider({ children }) {
         if (!savedUserType){
             return null;
         };
+
+        return testUsers[savedUserType] ?? null;
     });
 
     function selectUser(userType){
@@ -38,14 +40,14 @@ function UserProvider({ children }) {
             return;
         };
 
-        const selectedUser = testUser[userType];
+        const selectedUser = testUsers[userType];
 
         if(!selectedUser){
             return;
         };
 
         sessionStorage.setItem(
-            "userType", usertype
+            "userType", userType
         );
 
         setCurrentUser(selectedUser);
