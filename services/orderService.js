@@ -167,4 +167,4 @@ async function getOrderById(orderId) {
     return order;
 }
 
-export { createOrder, gotOrderById };
+export { createOrder, getOrderById };
