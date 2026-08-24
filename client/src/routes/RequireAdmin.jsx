@@ -1,5 +1,4 @@
 import { Navigate, Outlet } from "react-router-dom";
-
 import { useUser } from "./context/UserContext";
 
 function RequireAdmin() {
