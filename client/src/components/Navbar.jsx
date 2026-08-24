@@ -27,16 +27,17 @@ function Navbar(){
 
                 {/*Visitor...*/}
                 {!currentUser && (
-                    <div>
+                    <>
                         <li><NavLink to="/cart">Cart</NavLink></li>
 
                         <li><NavLink to="/login">Login</NavLink></li>
-                    </div>
-                )};
+                    </>
+                )}
 
                 {/*Customer.. */}
                 {currentUser?.role === "customer" && (
-                    <div>
+                    <>{/*"< fraktioner(?) för att inte påverka css-parent" */}
+
                         <li><NavLink to="/cart">Cart</NavLink></li>
 
                         <li><NavLink to="/account/profile">My account</NavLink></li>
@@ -44,12 +45,12 @@ function Navbar(){
                         <li><span className="navbar-userstate">User</span></li>
 
                         <li><button type= "button" onClick={handleLogout}>Logout</button></li>
-                    </div>
-                )};
+                    </>
+                )}
 
                 {/*Admin.. */}
                 {currentUser?.role === "admin" &&(
-                    <div>
+                    <>
                         <li><NavLink to="/admin/albums">Manage Albums</NavLink></li>
 
                         <li><NavLink to="/admin/orders">ORders</NavLink></li>
@@ -57,8 +58,8 @@ function Navbar(){
                         <li><span className="navbar-userstate">Admin</span></li>
 
                         <li><button type= "button" onClick={handleLogout}>Logout</button></li>
-                    </div>
-                )};
+                    </>
+                )}
  
 
             </ul>
