@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
 
 function CheckoutPage() {
 
@@ -18,6 +19,8 @@ function CheckoutPage() {
 
 
     async function handlePlaceOrder() {
+
+        const {currentUser} = useUser( );
 
         try {
             setIsSubmitting(true);
@@ -37,7 +40,7 @@ function CheckoutPage() {
                     headers: {"Content-Type": "application/json"},
 
                     body: JSON.stringify({
-                        userId: 1,
+                        userId: currentUser.id,
                         beatIds: beatIds
                     })
                 }
@@ -46,10 +49,8 @@ function CheckoutPage() {
             const data = await response.json();
 
             if (!response.ok){
-                throw new Error(
-                    data.message || "Could not create order"
-                );
-            }
+                throw new Error(data.message || "Could not create order");
+            };
 
             const orderId = data.order.id;
 
@@ -63,9 +64,21 @@ function CheckoutPage() {
 
         } finally {
             setIsSubmitting(false);
-        }
-    }
+        };
+    };
 
+
+    //måste vara inloggad som customer
+    if (!currentUser){
+        return(
+            <section>
+                <h1>Checkout</h1>
+
+                <p>You need to be logged in as a customer to place an order.</p>
+                <Link to="/albums">Back to music</Link>
+            </section>
+        );
+    }
 
     if (cartItems.length === 0) {
         return (
@@ -79,7 +92,7 @@ function CheckoutPage() {
                 </Link>
             </section>
         );
-    }
+    };
 
 
     return (
