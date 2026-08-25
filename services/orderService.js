@@ -165,6 +165,28 @@ async function getOrderById(orderId) {
 
 
     return order;
-}
+};
 
-export { createOrder, getOrderById };
+
+async function getAllOrders(){
+
+    const result = await pool.query(`
+        SELECT
+            orders.id,
+            orders.order_total::float AS "orderTotal",
+            orders.created_at AS "createdAt",
+
+            users.id AS "userId",
+            users.user_name AS "userName",
+            users.user_email AS "userEmail"
+
+        FROM orders
+        JOIN users
+        ON users.id = orders.user_id
+        ORDER BY orders.created_at DESC;
+    `);
+
+    return result.rows;
+};
+
+export { createOrder, getOrderById, getAllOrders };
