@@ -153,6 +153,24 @@ async function updateAlbum(albumId,albumName,albumPrice,releaseYear,coverImage){
     }
 
     return result.rows[0];
-}
+};
 
-export { getAllAlbums, getAlbumById, createAlbum, updateAlbum};
+async function deleteAlbum(albumId){
+    const result = await pool.query(`
+        DELETE FROM albums
+        WHERE id =$1
+        RETURNING
+        id,
+        album_name AS "albumName";`,
+    [albumId]
+    );
+
+    if (result.rows.length === 0){
+        return null;
+    }
+
+    return result.rows[0];
+};
+
+
+export { getAllAlbums, getAlbumById, createAlbum, updateAlbum, deleteAlbum};

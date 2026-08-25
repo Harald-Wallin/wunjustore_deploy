@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getAllAlbums, getAlbumById, createAlbum, updateAlbum} from "../services/albumService.js";
+import { getAllAlbums, getAlbumById, createAlbum, updateAlbum, deleteAlbum} from "../services/albumService.js";
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.get("/", async (request, response) => {
     };
 });
 
-//HÄMTAR SPECIFIKT ALBUM (designen visar sedan alla tracks tillhörande)
+//HÄMTAR SPECIFIKT ALBUM
 router.get("/:albumId", async (request, response) => {
     try{
         const albumId = Number(request.params.albumId);
@@ -153,6 +153,35 @@ router.put("/:albumId", async (request, response) => {
             message: "Could not update album"
         });
     };
+});
+
+router.delete("/:albumId", async (request,response) =>{
+    try{
+        const albumId = Number(request.params.albumId);
+        const deletedAlbum = await deleteAlbum(albumId);
+
+        if (!deletedAlbum){
+            return response.status(404).json({
+                success: false,
+                message: "album not found"
+            });
+        }
+
+    }catch (error){
+        console.error(
+            "Failed to delete album ):",
+            error
+        );
+
+        //"FK violation"
+        if (error.code === "23503"){
+            return response.status(409).json({
+                success: false,
+                message: "Album cannot be deleted while it still contains beats"
+            });
+        }
+
+    }    
 });
 
 

@@ -17,6 +17,7 @@ function AlbumEditorPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
 
     useEffect(() => {
@@ -98,6 +99,43 @@ function AlbumEditorPage() {
             setIsSubmitting(false);
         };
     };
+
+    async function handleDeleteAlbum(){
+
+        const confirmed = window.confirm(`Delete "${albumName}" permanently?`);
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setIsDeleting(true);
+            setError(null);
+
+            const response = await fetch(
+                `http://localhost:3000/api/albums/${albumId}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok){
+                throw new Error(data.message || "Could not delete album");
+            }
+
+            navigate("/admin/albums");
+
+        } catch (error){
+
+            console.error("Failed to delete album:",error);
+            setError(error.message);
+
+        } finally {
+            setIsDeleting(false);
+        }
+    ;}
 
 
     if (loading){
@@ -185,11 +223,20 @@ function AlbumEditorPage() {
 
                 <div className="album-form_actions">
 
+                    {/*Submitknapp */}
                     <button type="submit" disabled={isSubmitting}>
                         {isSubmitting ? "Saving..." : "Save changes"}
                     </button>
 
+                    {/*Deletealbum-knapp */}
+                    <button type="button"
+                        onClick={handleDeleteAlbum}
+                        disabled={isSubmitting || isDeleting}
+                    >
+                    {isDeleting? "Deleting...": "Delete album"}
+                    </button>
 
+                    {/*Tillbakaknapp */}
                     <button type="button"onClick={() => navigate("/admin/albums")}>
                         Back
                     </button>
