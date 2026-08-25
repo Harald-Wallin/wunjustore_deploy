@@ -13,7 +13,7 @@ function AdminOrdersPage() {
         async function fetchOrders() {
             try {
 
-                const response = await fetch("http://localhost:3000/api/orders");
+                const response = await fetch(`${API_URL}/api/orders`);
 
                 const data = await response.json();
 

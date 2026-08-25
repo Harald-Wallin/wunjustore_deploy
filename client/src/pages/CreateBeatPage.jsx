@@ -23,7 +23,7 @@ function CreateBeatPage() {
 
 
                 const response = await fetch(
-                    "http://localhost:3000/api/beats",
+                    `http://${API_URL}/api/beats`,
                     {
                         method: "POST",
 

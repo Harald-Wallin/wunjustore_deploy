@@ -18,7 +18,7 @@ function TrackListPage(){
     useEffect(() => {
         async function fetchAlbum(){
             try{
-                const response = await fetch(`http://localhost:3000/api/albums/${albumId}`);
+                const response = await fetch(`${API_URL}/api/albums/${albumId}`);
 
                 if(!response.ok){
                     throw new Error("could not fetch album");

@@ -23,7 +23,7 @@ function AlbumEditorPage() {
     useEffect(() => {
         async function fetchAlbum() {
             try {
-                const response = await fetch(`http://localhost:3000/api/albums/${albumId}`);
+                const response = await fetch(`${API_URL}/api/albums/${albumId}`);
 
                 const data = await response.json();
 
@@ -61,7 +61,7 @@ function AlbumEditorPage() {
 
 
             const response = await fetch(
-                `http://localhost:3000/api/albums/${albumId}`,
+                `${API_URL}/api/albums/${albumId}`,
                 {
                     method: "PUT",
 
@@ -113,7 +113,7 @@ function AlbumEditorPage() {
             setError(null);
 
             const response = await fetch(
-                `http://localhost:3000/api/albums/${albumId}`,
+                `${API_URL}/api/albums/${albumId}`,
                 {
                     method: "DELETE"
                 }

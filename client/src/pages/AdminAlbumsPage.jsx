@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import API_URL from "../config/api";
 
 function AdminAlbumsPage() {
 
@@ -11,7 +12,7 @@ function AdminAlbumsPage() {
     useEffect(() => {
         async function fetchAlbums() {
             try {
-                const response = await fetch("http://localhost:3000/api/albums");
+                const response = await fetch(`${API_URL}/api/albums`);
 
                 if (!response.ok){
                     throw new Error("Could not fetch albums");

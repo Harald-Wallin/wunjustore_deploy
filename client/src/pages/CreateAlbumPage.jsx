@@ -22,7 +22,7 @@ function CreateAlbumPage() {
             setIsSubmitting(true);
             setError(null);
 
-            const response = await fetch("http://localhost:3000/api/albums",
+            const response = await fetch(`${API_URL}/api/albums`,
                 {
                     method: "POST",
 

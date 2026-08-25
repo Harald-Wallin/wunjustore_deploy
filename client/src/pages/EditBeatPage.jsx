@@ -24,7 +24,7 @@ function EditBeatPage(){
         async function fetchBeat() {
 
             try {
-                const response = await fetch(`http://localhost:3000/api/beats/${beatId}`);
+                const response = await fetch(`${API_URL}/api/beats/${beatId}`);
 
                 const data = await response.json();
 
@@ -65,7 +65,7 @@ function EditBeatPage(){
 
 
             const response = await fetch(
-                `http://localhost:3000/api/beats/${beatId}`,
+                `${API_URL}/api/beats/${beatId}`,
                 {
                     method: "PUT",
                     headers: {
@@ -114,7 +114,7 @@ function EditBeatPage(){
             setError(null);
 
             const response = await fetch(
-                `http://localhost:3000/api/beats/${beatId}`,
+                `${API_URL}/api/beats/${beatId}`,
                 {
                  method: "DELETE"
                 }

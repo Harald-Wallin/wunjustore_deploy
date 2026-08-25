@@ -31,7 +31,7 @@ function CheckoutPage() {
 
 
             const response = await fetch(
-                "http://localhost:3000/api/orders",
+                `${API_URL}/api/orders`,
                 {
                     method: "POST",
 
