@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import API_URL from "../config/api";
+
 import { useUser } from "../context/UserContext.jsx";
 
 function CustomerOrdersPage() {

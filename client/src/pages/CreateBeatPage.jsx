@@ -1,6 +1,8 @@
 import { useState } from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
 
+import API_URL from "../config/api";
+
 function CreateBeatPage() {
     const navigate = useNavigate();
 

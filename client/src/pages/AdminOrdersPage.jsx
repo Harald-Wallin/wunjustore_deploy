@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import API_URL from "../config/api";
+
 function AdminOrdersPage() {
 
     const [orders, setOrders] = useState([]);

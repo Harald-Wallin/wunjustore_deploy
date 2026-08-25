@@ -1,6 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+import API_URL from "../config/api";
+
 function OrderConfirmationPage() {
 
     //hämtar :orderId från url

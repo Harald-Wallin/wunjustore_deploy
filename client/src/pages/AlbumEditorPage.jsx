@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import API_URL from "../config/api";
+
 function AlbumEditorPage() {
     const { albumId } = useParams();
     const navigate = useNavigate();
