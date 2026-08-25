@@ -189,4 +189,20 @@ async function getAllOrders(){
     return result.rows;
 };
 
-export { createOrder, getOrderById, getAllOrders };
+//Get orders by userId
+async function getOrdersByUserId(userId) {
+    const result = await pool.query(`
+        SELECT
+            orders.id,
+            orders.order_total::float AS "orderTotal",
+            orders.created_at AS "createdAt"
+        FROM orders
+        WHERE orders.user_id = $1
+        ORDER BY orders.created_at DESC;
+        `,[userId]
+    );
+
+    return result.rows;
+}
+
+export { createOrder, getOrderById, getAllOrders, getOrdersByUserId };

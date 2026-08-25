@@ -1,5 +1,5 @@
 import express from "express";
-import { createOrder, getOrderById, getAllOrders} from "../services/orderService.js";
+import { createOrder, getOrderById, getAllOrders, getOrdersByUserId} from "../services/orderService.js";
 
 const router = express.Router();
 
@@ -93,6 +93,28 @@ router.get("/:orderId", async (request, response) => {
             message: "Could not fetch order"
         });
     }
+});
+
+// GET /api/orders/user/:userId
+router.get("/user/:userId", async (request, response) => {
+    try {
+        const userId = Number(request.params.userId);
+
+        const orders = await getOrdersByUserId(userId);
+
+        response.status(200).json({
+            success: true,
+            orders
+        });
+
+    } catch (error) {
+        console.error("Failed to get user orders:",error);
+
+        response.status(500).json({
+            success: false,
+            message: "Could not fetch user orders"
+        });
+    };
 });
 
 
