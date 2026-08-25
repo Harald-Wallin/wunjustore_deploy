@@ -3,14 +3,23 @@ import { createRoot } from "react-dom/client";
 import {BrowserRouter} from "react-router-dom";
 
 import App from "./App";
+import {CartProvider} from "./context/CartContext";
+import { UserProvider } from "./context/UserContext";
 import "./index.css";
+import "./pages.css";
+import "./layout.css";
 
-//<BrowserRouter omsluter här <App> och gör så att den kan använda routingfunktioner
-
+//<BrowserRouter och context-providers'erna omsluter här <App> och gör så att den kan använda routingfunktioner
+//samt har tillgång till Provider-contexten.
+//PS. <Cart innanför <User för att cart förmodligen behöver veta UserState?
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <UserProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </UserProvider>
     </BrowserRouter>
   </StrictMode>
 );

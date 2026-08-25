@@ -1,8 +1,138 @@
-function CheckoutPage(){
-    return(
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+
+import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
+
+function CheckoutPage() {
+
+    const {
+        cartItems,
+        totalPrice,
+        clearCart
+    } = useCart();
+
+    const {currentUser} = useUser();
+
+    const navigate = useNavigate();
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState(null);
+
+    async function handlePlaceOrder() {
+        try {
+            setIsSubmitting(true);
+            setError(null);
+
+            //plockar ur beat.id så att endast denna data skickas till order (inget överflöd)
+            const beatIds = cartItems.map(
+                (currentBeat) => currentBeat.id
+            );
+
+
+            const response = await fetch(
+                `${API_URL}/api/orders`,
+                {
+                    method: "POST",
+
+                    headers: {"Content-Type": "application/json"},
+
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        beatIds: beatIds
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok){
+                throw new Error(data.message || "Could not create order");
+            };
+
+            const orderId = data.order.id;
+
+            clearCart();
+            //Navigate, som Link fast lotsar vidare användaren automatiskt
+            navigate(`/orders/${orderId}/confirmation`);
+
+        } catch (error){
+            console.error("Failed to place order:",error);
+            setError(error.message);
+
+        } finally {
+            setIsSubmitting(false);
+        };
+    };
+
+
+    //måste vara inloggad som customer
+    if (!currentUser){
+        return(
+            <section>
+                <h1>Checkout</h1>
+
+                <p>You need to be logged in as a customer to place an order.</p>
+                <Link to="/albums">Back to music</Link>
+            </section>
+        );
+    }
+
+    if (cartItems.length === 0) {
+        return (
+            <section>
+                <h1>Checkout</h1>
+
+                <p>Your cart is empty.</p>
+
+                <Link to="/albums">
+                    Browse music
+                </Link>
+            </section>
+        );
+    };
+
+
+    return (
         <section>
-            <h1>Checkout page</h1>
-            <p>Ordersammanfattning och customer-info här</p>
+            <h1>Checkout</h1>
+
+            <div className="checkout-items">
+
+                {cartItems.map((currentBeat) => (
+                    <article key={currentBeat.id} className="checkout-item">
+                        <img
+                            src={currentBeat.albumCover}
+                            alt={`Cover for ${currentBeat.albumName}`}
+                        />
+
+                        <div>
+                            <h2>{currentBeat.beatName}</h2>
+                            <p>{currentBeat.albumName}</p>
+                            <p>Price: {currentBeat.beatPrice.toFixed(2)} kr</p>
+                        </div>
+                    </article>
+                ))};
+            </div>
+
+
+            <div className="checkout-total">
+
+                <p>Total: {totalPrice.toFixed(2)} kr</p>
+            </div>
+
+            {error && (<p>{error}</p>)}
+
+            {/*Lite UX som FAKTISKT fångar eventuellt fel: att kunden spam-klickar innan servern
+            hinner svara och lägger flera identiska ordrar förhindras när knappen disable'as!!*/}
+            <button
+                type="button"
+                onClick={handlePlaceOrder}
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? "Placing order..." : "Place order"}
+            </button>
+
         </section>
     );
 };

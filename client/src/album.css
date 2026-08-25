@@ -40,6 +40,7 @@
   background-color: #222222;
 }
 
+
 .album-card_content {
   display: flex;
   flex-direction: column;
@@ -118,6 +119,21 @@
 
 
 /*Media player*/
-.preview-player{
-  
+.preview-player{}
+
+/*Cart*/
+
+.cart-item{
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin: 0, 10rem, 0, 10rem;
+}
+
+.cart-item_price{
+  margin-left: auto; 
+}
+
+.cart-item_image{
+  width: 10%;
 }
