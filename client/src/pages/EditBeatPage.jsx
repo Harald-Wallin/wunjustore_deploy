@@ -10,7 +10,8 @@ function EditBeatPage(){
     const [beatName, setBeatName] = useState("");
     const [beatPrice, setBeatPrice] = useState("");
     const [previewUrl, setPreviewUrl] = useState("");
-
+    const [isDeleting, setIsDeleting] = useState(false)
+    ;
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -99,9 +100,48 @@ function EditBeatPage(){
         };
     };
 
+    async function handleDelete(){
+
+        const confirmed = window.confirm(`Delete "${beatName}" permanently?`);
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        try {
+            setIsDeleting(true);
+            setError(null);
+
+            const response = await fetch(
+                `http://localhost:3000/api/beats/${beatId}`,
+                {
+                 method: "DELETE"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Could not delete beat");
+            };
+
+            //efter deleten navigeras användaren om
+            navigate(`/admin/albums/${data.beat.albumId}/edit`);
+
+        } catch (error){
+
+            console.error("Failed to delete beat:",error);
+            setError(error.message);
+
+        } finally {
+
+        setIsDeleting(false);
+    };
+};
+
 
     function handleBack() {
-
         navigate(`/admin/albums/${albumId}/edit`);
     };
 
@@ -125,11 +165,10 @@ function EditBeatPage(){
     };
 
 
-    return (
+    return(
         <section className="edit-beat-page">
 
             <h1>Edit Beat</h1>
-
 
             <form className="beat-form" onSubmit={handleSubmit}>
 
@@ -191,14 +230,19 @@ function EditBeatPage(){
 
                 {error && (<p className="form-error">{error}</p>)};
 
-
                 {successMessage && (<p className="form-success">{successMessage}</p>)};
 
 
                 <div className="beat-form_actions">
 
+                    
                     <button type="submit" disabled={isSubmitting}>
                         {isSubmitting ? "Saving..." : "Save changes"}
+                    </button>
+
+                    <button type="button" onClick={handleDelete} 
+                        disabled={isSubmitting || isDeleting}>
+                            {isDeleting? "Deleting...": "Delete beat"}
                     </button>
 
 

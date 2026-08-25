@@ -1,6 +1,6 @@
 import express from "express";
 
-import { createBeat, getBeatById, updateBeat} from "../services/beatService.js";
+import { createBeat, getBeatById, updateBeat, deleteBeat} from "../services/beatService.js";
 
 const router = express.Router();
 
@@ -164,6 +164,37 @@ router.put("/:beatId", async (request, response) => {
         response.status(500).json({
             success: false,
             message: "Could not update beat"
+        });
+    };
+});
+
+//delete beat
+router.delete("/:beatId", async (request, response) => {
+    try {
+        const beatId = Number(request.params.beatId);
+        const deletedBeat = await deleteBeat(beatId);
+
+        if (!deletedBeat) {
+            return response.status(404).json({
+                success: false,
+                message: "Beat not found"
+            });
+        };
+
+
+        response.status(200).json({
+            success: true,
+            beat: deletedBeat
+        });
+
+    } catch (error) {
+
+        console.error("Failed to delete beat:",error);
+
+
+        response.status(500).json({
+            success: false,
+            message: "Could not delete beat"
         });
     };
 });

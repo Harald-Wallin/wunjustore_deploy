@@ -54,7 +54,7 @@ async function getBeatById(beatId){
 };
 
 
-//update baet
+//update beat
 async function updateBeat(beatId,albumId,beatName,beatPrice,previewUrl) 
 {
     const result = await pool.query(`
@@ -90,4 +90,27 @@ async function updateBeat(beatId,albumId,beatName,beatPrice,previewUrl)
     return result.rows[0];
 };
 
-export { createBeat, getBeatById, updateBeat };
+
+//Delete beat
+async function deleteBeat(beatId) {
+
+    const result = await pool.query(`
+        DELETE FROM beats
+        WHERE id = $1
+
+        RETURNING
+            id,
+            album_id AS "albumId",
+            beat_name AS "beatName";
+        `,[beatId]
+    );
+
+
+    if (result.rows.length === 0) {
+        return null;
+    }
+
+    return result.rows[0];
+}
+
+export { createBeat, getBeatById, updateBeat, deleteBeat };
