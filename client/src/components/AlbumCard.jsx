@@ -8,7 +8,7 @@ function AlbumCard({album}){
 
     return(
         <article className="album-card_browse">
-            <Link to={`${album.id}`} className="album-card_cover-link">
+            <Link to={`/albums/${album.id}`} className="album-card_cover-link">
                 <img src={album.coverImage} alt={`Cover for ${album.albumName}`}
                     className="album-card_cover"
                 />
@@ -20,7 +20,7 @@ function AlbumCard({album}){
                 <p>{album.albumPrice.toFixed(2)}</p>
 
                 <div className="album-card_actions">
-                    <Link to={`${album.id}`}>
+                    <Link to={`/albums/${album.id}`}>
                         Browse Beats
                     </Link>
 

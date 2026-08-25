@@ -1,6 +1,8 @@
 import {useParams} from "react-router-dom";
 import {useState, useEffect} from "react";
 
+import API_URL from "../config/api";
+
 import {useCart} from "../context/CartContext";
 //import mockAlbums from "../data/mockAlbums";
 import BeatList from "../components/BeatList";
