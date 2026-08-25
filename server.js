@@ -5,7 +5,7 @@ import express from "express";
 //Routes
 import albumRoutes from "./routes/albumRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import beatRoutes from ".routes/beatRoutes.js";
+import beatRoutes from "./routes/beatRoutes.js";
 
 const app = express();
 
