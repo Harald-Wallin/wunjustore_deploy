@@ -25,7 +25,7 @@ function CreateBeatPage() {
 
 
                 const response = await fetch(
-                    `http://${API_URL}/api/beats`,
+                    `${API_URL}/api/beats`,
                     {
                         method: "POST",
 
