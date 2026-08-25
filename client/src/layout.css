@@ -1,15 +1,22 @@
-/*TILLFÄLLIG, AI-GENERERAD CSS*/
+/*AI-genererad CSS*/
+
+/* =========================================
+   APP LAYOUT
+========================================= */
 
 .app-layout {
   min-height: 100vh;
 
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
 .site-header {
+  width: 100%;
+
   border-bottom: 1px solid #333333;
+
+  background: #111111;
 }
 
 .site-header_div {
@@ -17,7 +24,7 @@
   min-height: 80px;
 
   margin-inline: auto;
-  
+
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25,6 +32,8 @@
 }
 
 .site-header_logo {
+  flex-shrink: 0;
+
   font-size: 1.5rem;
   font-weight: 700;
   text-decoration: none;
@@ -36,23 +45,32 @@
 
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+
+  gap: 1.25rem;
 
   list-style: none;
 }
 
-.navbar_link {
+.navbar_list a {
   text-decoration: none;
-  opacity: 0.7;
+
+  opacity: 0.75;
+
+  transition: opacity 0.15s ease;
 }
 
-.navbar_link:hover {
+.navbar_list a:hover {
   opacity: 1;
 }
 
-.navbar_link--active {
-  opacity: 1;
-  text-decoration: underline;
+.navbar-userstate {
+  font-weight: 700;
+}
+
+.navbar_list button {
+  padding: 0.45rem 0.75rem;
 }
 
 .app-layout_main {
@@ -65,6 +83,8 @@
 }
 
 .site-footer {
+  width: 100%;
+
   border-top: 1px solid #333333;
 }
 
@@ -76,4 +96,45 @@
 
   display: flex;
   align-items: center;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 800px) {
+
+  .site-header_div {
+    padding-block: 1rem;
+
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 1rem;
+  }
+
+  .navbar_list {
+    justify-content: flex-start;
+
+    gap: 0.8rem 1rem;
+  }
+
+  .app-layout_main {
+    padding-block: 2rem;
+  }
+}
+
+
+@media (max-width: 500px) {
+
+  .site-header_div,
+  .app-layout_main,
+  .site-footer_div {
+    width: min(100% - 1rem, 1200px);
+  }
+
+  .navbar_list {
+    font-size: 0.9rem;
+  }
 }

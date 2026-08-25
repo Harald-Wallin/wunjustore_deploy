@@ -58,20 +58,31 @@ function TrackListPage(){
     };
 
     return(
-        <section>
-            <div className="album-details_div">
-                <h1>{album.albumName}</h1>
+        <section className="album-details-page" style={{"--album-cover": `url(${album.coverImage})`}}>
+            <div className="album-details_overlay">
 
-                <img className="album-details_cover" src={album.coverImage} alt={`Cover for ${album.albumName}`} />
+                <div className="album-details_div">
 
-                <p>{album.releaseYear}</p>
-                <p>Price: {album.albumPrice} kr</p>
+                    <div className="album-details_meta">
+                        <img className="album-details_cover" src={album.coverImage}
+                            alt={`Cover for ${album.albumName}`}
+                        />
 
-                <button type="button" onClick={()=> addAlbumToCart(album)}>
-                    Add album to cart
-                </button>
+                        <h1>{album.albumName}</h1>
+                    </div>
+                </div>
+
+                <div className ="album-details_info">
+                        {/* <img className="album-details_cover" src={album.coverImage} alt={`Cover for ${album.albumName}`} /> */}
+                        <p>{album.releaseYear}</p>
+                        <p>Price: {album.albumPrice} kr</p>
+
+                        <button type="button" onClick={()=> addAlbumToCart(album)}>
+                            Add album to cart
+                        </button>
+                </div>
             </div>
-
+            
             <h2>Tracks</h2>
             <BeatList beats={album.beats} />
         </section>

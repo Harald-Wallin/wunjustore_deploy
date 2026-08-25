@@ -84,7 +84,7 @@ function LoginPage() {
 
             <Link to="/">Back</Link>
 
-            {currentUser && (<p>Currently logged in as:{" "}{currentUser.name}</p>)};
+            {currentUser && (<p>Currently logged in as:{" "}{currentUser.name}</p>)}
             
         </section>
     );

@@ -41,7 +41,7 @@ function CartPage(){
                         </Link>
 
                         <h2>{currentBeat.beatName}</h2>
-                        <p>{currentBeat.albumName}</p>
+                        {/*<p>{currentBeat.albumName}</p>*/}
                         <p className="cart-item_price">Price:{currentBeat.beatPrice.toFixed(2)} kr</p>
 
                         <button type="button" 

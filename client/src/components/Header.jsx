@@ -10,7 +10,7 @@ function Header(){
             <div className="site-header_div">
 
                 <Link to="/" className="site-header_logo">
-                    WUNJU
+                    //WUNJU//
                 </Link>
                 
                 <Navbar />

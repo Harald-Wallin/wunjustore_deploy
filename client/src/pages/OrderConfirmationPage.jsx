@@ -96,7 +96,7 @@ function OrderConfirmationPage() {
                         </div>
                     </article>
 
-                ))};
+                ))}
 
             </div>
 
