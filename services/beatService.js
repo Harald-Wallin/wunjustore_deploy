@@ -90,4 +90,4 @@ async function updateBeat(beatId,albumId,beatName,beatPrice,previewUrl)
     return result.rows[0];
 };
 
-export { createBeat };
+export { createBeat, getBeatById, updateBeat };
