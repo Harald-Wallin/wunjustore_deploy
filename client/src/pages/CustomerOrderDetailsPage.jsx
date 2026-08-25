@@ -1,95 +1,109 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-import { useUser } from "../context/UserContext.jsx";
+function CustomerOrderDetailsPage() {
 
-function CustomerOrdersPage() {
-    const { currentUser } = useUser();
+    const { orderId } = useParams();
 
-    const [orders, setOrders] = useState([]);
+    const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
 
     useEffect(() =>{
-        async function fetchOrders() {
+
+        async function fetchOrder() {
             try {
-                const response = await fetch(`http://localhost:3000/api/orders/user/${currentUser.id}`);
+
+                const response = await fetch(`http://localhost:3000/api/orders/${orderId}`);
 
                 const data = await response.json();
 
+
                 if (!response.ok) {
-                    throw new Error(data.message || "Could not fetch orders");
+                    throw new Error(data.message || "Could not fetch order");
                 };
 
-                setOrders(data.orders);
+                setOrder(data.order);
 
-            }catch (error){
-                console.error("Failed to fetch customer orders:",error);
+            } catch (error){
+
+                console.error("Failed to fetch customer order:",error);
                 setError(error.message);
-
-            } finally {
+            } finally{
                 setLoading(false);
             };
         };
 
-        fetchOrders();
+        fetchOrder();
 
-    }, [currentUser.id]);
+    }, [orderId]);
 
 
     if (loading) {
         return (
             <section>
-                <h1>My Orders</h1>
-                <p>Loading orders...</p>
+                <h1>Loading order...</h1>
             </section>
         );
-    };
+    }
 
 
-    if (error){
+    if (error || !order) {
         return (
             <section>
-                <h1>My Orders</h1>
+                <h1>Order not found</h1>
+
                 <p>{error}</p>
+
+                <Link to="/account/orders">
+                    Back to My Orders
+                </Link>
             </section>
         );
     };
 
 
-    return(
-        <section className="customer-orders-page">
+    return (
+        <section className="customer-order-details-page">
 
-            <h1>My Orders</h1>
+            <Link to="/account/orders">
+                Back to My Orders
+            </Link>
+
+            <h1>Order #{order.id}</h1>
+
+            <p>Created:{" "}{new Date(order.createdAt).toLocaleString()}</p>
+
+            <div className="customer-order-items">
+
+                <h2>Purchased Beats</h2>
+
+                {order.items.map((currentItem) => (
+
+                    <article key={currentItem.beatId} className="customer-order-item">
+
+                        <img className="customer-order-item_cover" src={currentItem.albumCover}
+                            alt={`Cover for ${currentItem.albumName}`}  
+                        />
+
+                        <div className="customer-order-item_info">
+
+                            <h3>{currentItem.beatName}</h3>
+                            <p>{currentItem.albumName}</p>
+                            <p>{currentItem.unitPrice.toFixed(2)} kr</p>
+                        </div>
+                    </article>
+                ))}
+            </div>
 
 
-            {orders.length === 0 ? (<p>You have no orders yet.</p>): 
-            (
-                <div className="customer-orders-list">
-
-                    {orders.map((currentOrder) => (
-                        <article key={currentOrder.id} className="customer-order-row">
-
-                            <div>
-                                <h2>Order #{currentOrder.id}</h2>
-
-                                <p>Total: {currentOrder.orderTotal.toFixed(2)} kr</p>
-                                <p>{new Date(currentOrder.createdAt).toLocaleString()}</p>
-                            </div>
-
-
-                            <Link to={`/account/orders/${currentOrder.id}`}>
-                                View order
-                            </Link>
-                        </article>
-                    ))}
-
-                </div>
-            )}
+            <div className="customer-order-total">
+                <h2>Total: {order.orderTotal.toFixed(2)} kr</h2>
+            </div>
 
         </section>
     );
 };
 
-export default CustomerOrdersPage;
+export default CustomerOrderDetailsPage;

@@ -62,6 +62,49 @@ router.post("/", async (request, response) => {
 });
 
 
+//get orders
+router.get("/", async (request, response) => {
+    try {
+        const orders = await getAllOrders();
+
+        response.status(200).json({
+            success: true,
+            orders
+        });
+
+    } catch (error) {
+
+        console.error("Failed to get orders:",error);
+
+        response.status(500).json({
+            success: false,
+            message: "Could not fetch orders"
+        });
+    };
+});
+
+
+//gET orders/user/:userId
+router.get("/user/:userId", async (request, response) => {
+    try {
+        const userId = Number(request.params.userId);
+
+        const orders = await getOrdersByUserId(userId);
+
+        response.status(200).json({
+            success: true,
+            orders
+        });
+
+    } catch (error) {
+        console.error("Failed to get user orders:",error);
+
+        response.status(500).json({
+            success: false,
+            message: "Could not fetch user orders"
+        });
+    };
+});
 
 //get /api/orders/:orderId
 router.get("/:orderId", async (request, response) => {
@@ -95,49 +138,7 @@ router.get("/:orderId", async (request, response) => {
     }
 });
 
-// GET /api/orders/user/:userId
-router.get("/user/:userId", async (request, response) => {
-    try {
-        const userId = Number(request.params.userId);
 
-        const orders = await getOrdersByUserId(userId);
-
-        response.status(200).json({
-            success: true,
-            orders
-        });
-
-    } catch (error) {
-        console.error("Failed to get user orders:",error);
-
-        response.status(500).json({
-            success: false,
-            message: "Could not fetch user orders"
-        });
-    };
-});
-
-
-//get orders
-router.get("/", async (request, response) => {
-    try {
-        const orders = await getAllOrders();
-
-        response.status(200).json({
-            success: true,
-            orders
-        });
-
-    } catch (error) {
-
-        console.error("Failed to get orders:",error);
-
-        response.status(500).json({
-            success: false,
-            message: "Could not fetch orders"
-        });
-    };
-});
 
 
 export default router;
