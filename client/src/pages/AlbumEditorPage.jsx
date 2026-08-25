@@ -272,10 +272,10 @@ function AlbumEditorPage() {
                                     Edit
                                 </Link>
                             </article>
-                        ))};
+                        ))}
 
                     </div>
-                )};
+                )}
             </section>
         </section>
     );

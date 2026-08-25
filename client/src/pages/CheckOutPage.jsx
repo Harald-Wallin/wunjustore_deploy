@@ -12,16 +12,14 @@ function CheckoutPage() {
         clearCart
     } = useCart();
 
+    const {currentUser} = useUser();
+
     const navigate = useNavigate();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-
     async function handlePlaceOrder() {
-
-        const {currentUser} = useUser( );
-
         try {
             setIsSubmitting(true);
             setError(null);

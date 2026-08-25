@@ -95,7 +95,7 @@ function AdminAlbumsPage() {
                             <Link to={`/admin/albums/${currentAlbum.id}/edit`}>Edit</Link>
                         </div>
                     </article>
-                ))};
+                ))}
             </div>
         </section>
     );

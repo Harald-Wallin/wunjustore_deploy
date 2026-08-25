@@ -35,8 +35,11 @@ function CartPage(){
                 {cartItems.map((currentBeat) => (
                     /*Intern extra-return för att vi kör kod innuti map()*/
                     <article key={currentBeat.id} className="cart-item">
+                        
+                        <Link to={`/albums/${currentBeat.albumId}`} className="album-card_cover-link">
+                            <img className="cart-item_image" src={currentBeat.albumCover} alt="Album Cover" />
+                        </Link>
 
-                        <img className="cart-item_image" src={currentBeat.albumCover} alt="Album Cover" />
                         <h2>{currentBeat.beatName}</h2>
                         <p>{currentBeat.albumName}</p>
                         <p className="cart-item_price">Price:{currentBeat.beatPrice.toFixed(2)} kr</p>

@@ -103,7 +103,7 @@ function AdminOrderDetailsPage() {
 
                     </article>
 
-                ))};
+                ))}
 
             </div>
 
