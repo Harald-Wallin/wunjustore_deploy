@@ -9,7 +9,7 @@ function HomePage(){
 
                 {/*Hårdkodad non-existent "NewsCard" */}
                 <Link to={`/albums/9`}>
-                    <img className="news-hero" src="../public/images/mixedBitsVol3.jpg"
+                    <img className="news-hero" src="../images/mixedBitsVol3.jpg"
                     alt="Hero-cover"></img>
                 </Link>
                 <h2>Mixed Bits Vol.3</h2>
