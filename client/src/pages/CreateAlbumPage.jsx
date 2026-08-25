@@ -105,7 +105,7 @@ function CreateAlbumPage() {
                 <label>
                     Cover image URL
 
-                    <input type="text" value={coverImage} monChange={(event) =>
+                    <input type="text" value={coverImage} onChange={(event) =>
                             setCoverImage(event.target.value)
                         }
                         placeholder="/images/example.jpg"

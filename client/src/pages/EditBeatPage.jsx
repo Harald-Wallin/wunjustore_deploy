@@ -225,13 +225,11 @@ function EditBeatPage(){
                         <source src={previewUrl} type="audio/wav"/>
                         Your browser does not support audio playback )':
                     </audio>
-                )};
+                )}
 
 
-                {error && (<p className="form-error">{error}</p>)};
-
-                {successMessage && (<p className="form-success">{successMessage}</p>)};
-
+                <strong>{error && (<p className="form-error">{error}</p>)}</strong>
+                <strong>{successMessage && (<p className="form-success">{successMessage}</p>)}</strong>
 
                 <div className="beat-form_actions">
 

@@ -17,7 +17,7 @@ router.get("/", async (request, response) => {
         console.error("Failed to get albums (this time..):", error);
     
         response.status(500).json({
-            sucess: false,
+            success: false,
             message: "Could not fetch albums this time..)",
         });
     };
@@ -31,7 +31,7 @@ router.get("/:albumId", async (request, response) => {
 
         if (!album){
             return response.status(404).json({
-                sucess: false,
+                success: false,
                 message: "Album not found"
             });
         };
@@ -42,7 +42,7 @@ router.get("/:albumId", async (request, response) => {
         console.error("Failed to get album (this time..):", error);
     
         response.status(500).json({
-            sucess: false,
+            success: false,
             message: "Could not fetch album this time..)",
         });
     };
@@ -167,6 +167,11 @@ router.delete("/:albumId", async (request,response) =>{
             });
         }
 
+        response.status(200).json({
+            success: true,
+            album: deleteAlbum
+        });
+
     }catch (error){
         console.error(
             "Failed to delete album ):",
@@ -181,7 +186,7 @@ router.delete("/:albumId", async (request,response) =>{
             });
         }
 
-    }    
+    };   
 });
 
 

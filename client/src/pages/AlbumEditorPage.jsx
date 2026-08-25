@@ -135,7 +135,7 @@ function AlbumEditorPage() {
         } finally {
             setIsDeleting(false);
         }
-    ;}
+    };
 
 
     if (loading){
@@ -217,9 +217,9 @@ function AlbumEditorPage() {
                 )}
 
 
-                {error && (<p className="form-error">{error}</p>)};
+                <strong>{error && (<p className="form-error">{error}</p>)}</strong>
 
-                {successMessage && (<p className="form-success">{successMessage}</p>)};
+                <strong>{successMessage && (<p className="form-success">{successMessage}</p>)}</strong>
 
                 <div className="album-form_actions">
 
