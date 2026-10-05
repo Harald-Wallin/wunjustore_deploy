@@ -4,18 +4,25 @@ import {useState, useEffect} from "react";
 import API_URL from "../config/api";
 
 import {useCart} from "../context/CartContext";
+import { useCurrency } from "../context/CurrencyContext";
+
 //import mockAlbums from "../data/mockAlbums";
 import BeatList from "../components/BeatList";
+
 
 function TrackListPage(){
 
     const {albumId}=useParams();
     const {addAlbumToCart} = useCart();
+
+    const { currency, convertPrice } = useCurrency();
     
     //State
     const [album, setAlbum] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    
 
     useEffect(() => {
         async function fetchAlbum(){
@@ -77,7 +84,7 @@ function TrackListPage(){
                 <div className ="album-details_info">
                         {/* <img className="album-details_cover" src={album.coverImage} alt={`Cover for ${album.albumName}`} /> */}
                         <p>{album.releaseYear}</p>
-                        <p>Price: {album.albumPrice} kr</p>
+                        <p>Price: {convertPrice(album.albumPrice).toFixed(2)} {currency}</p>
 
                         <button type="button" onClick={()=> addAlbumToCart(album)}>
                             Add album to cart

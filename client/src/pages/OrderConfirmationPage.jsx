@@ -3,10 +3,13 @@ import { useEffect, useState } from "react";
 
 import API_URL from "../config/api";
 
+import { useCurrency } from "../context/CurrencyContext";
+
 function OrderConfirmationPage() {
 
     //hämtar :orderId från url
     const { orderId } = useParams();
+    const {currency, convertPrice} = useCurrency();
 
     //state
     const [order, setOrder] = useState(null);
@@ -94,7 +97,7 @@ function OrderConfirmationPage() {
 
                             <h3>{currentItem.beatName}</h3>
                             <p>{currentItem.albumName}</p>
-                            <p>{currentItem.unitPrice.toFixed(2)} kr</p>
+                            <p>{convertPrice(currentItem.unitPrice).toFixed(2)} {currency}</p>
                         </div>
                     </article>
 
@@ -105,7 +108,7 @@ function OrderConfirmationPage() {
 
             <div className="order-confirmation_total">
 
-                <strong>Total: {order.orderTotal.toFixed(2)} kr</strong>
+                <strong>Total: {convertPrice(order.orderTotal).toFixed(2)} {currency}</strong>
 
             </div>
 

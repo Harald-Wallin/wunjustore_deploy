@@ -1,5 +1,6 @@
 import {NavLink} from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { useCurrency } from "../context/CurrencyContext";
 
 // Navigationskomponent till "sidorna" Home, BrowseMusic, About, Cart och Login
 //Jag använder NavLink (ej "link") för att senare kunna MARKERA vilken sida som användaren står på just nu.
@@ -8,6 +9,7 @@ import { useUser } from "../context/UserContext";
 function Navbar(){
 
     const{currentUser, selectUser} = useUser();
+    const { currency, setCurrency } = useCurrency();
 
     //Om man loggar ut återgår userState till visitor
     function handleLogout(){
@@ -60,6 +62,16 @@ function Navbar(){
                         <li><button type= "button" onClick={handleLogout}>Logout</button></li>
                     </>
                 )}
+
+                <li>
+                    <select value={currency}
+                        onChange={(event) => setCurrency(event.target.value)}>
+                        <option value="SEK">SEK</option>
+                        <option value="EUR">EUR</option>
+                        <option value="USD">USD</option>
+                        <option value="GOLD">WoW-Gold</option>
+                    </select>
+                </li>
  
 
             </ul>

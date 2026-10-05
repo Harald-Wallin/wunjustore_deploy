@@ -1,8 +1,12 @@
 import {useCart} from "../context/CartContext";
+import { useCurrency } from "../context/CurrencyContext";
 
 function BeatRow({beat}){
 
     const {cartItems, addBeatToCart} = useCart();
+    const {currency, convertPrice} = useCurrency();
+
+    const convertedPrice = convertPrice(beat.beatPrice);
 
     //Variabel som håller beats som redan finns i kundkorgen
     const beatAlreadyInCart = cartItems.some(
@@ -24,7 +28,7 @@ function BeatRow({beat}){
                     Your browser does not support audio playback ):
                 </audio>
 
-                <p>Price: {beat.beatPrice.toFixed(2)}</p>
+                <p><strong>Price: {convertedPrice.toFixed(2)} {currency}</strong></p>
 
                 {/*Lade till lite UX- om 'beatAlreadyInCart' > visa "in cart" */}
                 <button type="button" onClick ={()=> addBeatToCart(beat)}

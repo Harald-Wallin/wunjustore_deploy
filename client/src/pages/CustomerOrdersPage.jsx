@@ -4,9 +4,11 @@ import { Link } from "react-router-dom";
 import API_URL from "../config/api";
 
 import { useUser } from "../context/UserContext.jsx";
+import { useCurrency } from "../context/CurrencyContext";
 
 function CustomerOrdersPage() {
     const { currentUser } = useUser();
+    const {currency, convertPrice} = useCurrency();
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ function CustomerOrdersPage() {
                             <div>
                                 <h2>Order #{currentOrder.id}</h2>
 
-                                <p>Total: {currentOrder.orderTotal.toFixed(2)} kr</p>
+                                <p>Total: {convertPrice(currentOrder.orderTotal).toFixed(2)} {currency}</p>
                                 <p>{new Date(currentOrder.createdAt).toLocaleString()}</p>
                             </div>
 

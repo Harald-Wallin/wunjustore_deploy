@@ -3,9 +3,12 @@ import { Link, useParams } from "react-router-dom";
 
 import API_URL from "../config/api";
 
+import { useCurrency } from "../context/CurrencyContext";
+
 function CustomerOrderDetailsPage() {
 
     const { orderId } = useParams();
+    const {currency, convertPrice} = useCurrency();
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -93,7 +96,7 @@ function CustomerOrderDetailsPage() {
 
                             <h3>{currentItem.beatName}</h3>
                             <p>{currentItem.albumName}</p>
-                            <p>{currentItem.unitPrice.toFixed(2)} kr</p>
+                            <p>{convertPrice(currentItem.unitPrice).toFixed(2)} {currency}</p>
                         </div>
                     </article>
                 ))}
@@ -101,7 +104,7 @@ function CustomerOrderDetailsPage() {
 
 
             <div className="customer-order-total">
-                <h2>Total: {order.orderTotal.toFixed(2)} kr</h2>
+                <h2>Total: Total: {convertPrice(order.orderTotal).toFixed(2)} {currency}</h2>
             </div>
 
         </section>

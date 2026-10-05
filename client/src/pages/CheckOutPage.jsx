@@ -5,6 +5,7 @@ import API_URL from "../config/api";
 
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
+import { useCurrency } from "../context/CurrencyContext";
 
 function CheckoutPage() {
 
@@ -15,6 +16,7 @@ function CheckoutPage() {
     } = useCart();
 
     const {currentUser} = useUser();
+    const {currency, convertPrice} = useCurrency();
 
     const navigate = useNavigate();
 
@@ -111,7 +113,7 @@ function CheckoutPage() {
                         <div>
                             <h2>{currentBeat.beatName}</h2>
                             <p>{currentBeat.albumName}</p>
-                            <p>Price: {currentBeat.beatPrice.toFixed(2)} kr</p>
+                            <p>Price: {convertPrice(currentBeat.beatPrice).toFixed(2)} {currency}</p>
                         </div>
                     </article>
                 ))};
@@ -120,7 +122,7 @@ function CheckoutPage() {
 
             <div className="checkout-total">
 
-                <p>Total: {totalPrice.toFixed(2)} kr</p>
+                <p>Total: {convertPrice(totalPrice).toFixed(2)} {currency}</p>
             </div>
 
             {error && (<p>{error}</p>)}

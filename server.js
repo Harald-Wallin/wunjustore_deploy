@@ -6,6 +6,7 @@ import express from "express";
 import albumRoutes from "./routes/albumRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import beatRoutes from "./routes/beatRoutes.js";
+import currencyRoutes from "./routes/currencyRoutes.js";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.get("/api/health", (request, response) => {
 app.use("/api/albums", albumRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/beats", beatRoutes);
+app.use ("/api/currency", currencyRoutes);
 
 app.use((request, response) => {
   response.status(404).json({

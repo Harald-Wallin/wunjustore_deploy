@@ -1,5 +1,6 @@
 import {Link} from "react-router-dom";
 import {useCart} from "../context/CartContext";
+import { useCurrency } from "../context/CurrencyContext";
 //import mockAlbums from "../data/mockAlbums";
 
 function CartPage(){
@@ -10,6 +11,8 @@ function CartPage(){
         clearCart,
         totalPrice
     } = useCart();
+
+    const {currency, convertPrice} = useCurrency();
 
 
     //Om tom så...
@@ -42,7 +45,7 @@ function CartPage(){
 
                         <h2>{currentBeat.beatName}</h2>
                         {/*<p>{currentBeat.albumName}</p>*/}
-                        <p className="cart-item_price">Price:{currentBeat.beatPrice.toFixed(2)} kr</p>
+                        <p className="cart-item_price">Price: {convertPrice(currentBeat.beatPrice).toFixed(2)} {currency}</p>
 
                         <button type="button" 
                             onClick={()=> removeBeatFromCart(currentBeat.id)}>
@@ -54,7 +57,7 @@ function CartPage(){
 
             {/*Totalbelopp + Checkout-länk. toFixed = konsant 2 decimaler*/}
             <div className="cart-total">
-                <p>Total: {totalPrice.toFixed(2)} kr</p>
+                <p>Total: {convertPrice(totalPrice).toFixed(2)} {currency}</p>
 
                 <Link to="/checkout">
                     Checkout
