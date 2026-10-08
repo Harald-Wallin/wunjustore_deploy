@@ -6,7 +6,7 @@ import { useCurrency } from "../context/CurrencyContext";
 function AlbumCard({album}){
 
     const {addAlbumToCart} = useCart();
-    const {currency, convertPrice} = useCurrency();
+    const {effectiveCurrency, convertPrice} = useCurrency();
 
     const convertedPrice = convertPrice(album.albumPrice);
 
@@ -21,7 +21,7 @@ function AlbumCard({album}){
             <div className="album-card_content">
                 <h2>{album.albumName}</h2>
                 <p>{album.releaseYear}</p>
-                <p><strong>{convertedPrice.toFixed(2)} {currency}</strong></p>
+                <p><strong>{convertedPrice.toFixed(2)} {effectiveCurrency}</strong></p>
 
                 <div className="album-card_actions">
                     <Link to={`/albums/${album.id}`}>

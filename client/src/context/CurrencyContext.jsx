@@ -12,26 +12,45 @@ function CurrencyProvider({ children }) {
     //Default här betyder alltså 1kr = 1kr
     const [rates, setRates] = useState({SEK: 1});
 
+    const effectiveCurrency = rates[currency] ? currency : "SEK";
+
     useEffect(() => {
 
         async function fetchRates(){
 
-            const response = await fetch(`${API_URL}/api/currency/rates?base=SEK`);
-            const data = await response.json();
+            try{
+                const response = await fetch(`${API_URL}/api/currency/rates?base=SEK`);
 
-            //Sätter rates till SEK: 1 + data.rates
-            setRates({SEK: 1,...data.rates});
-        }
+                if(!response.ok){
+                    throw new Error(`Failed to fetch currency rates: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                //Sätter rates till SEK: 1 + data.rates
+                setRates({SEK: 1,...data.rates});
+
+            }catch(error){
+               console.error("Could not load currency rates:", error); 
+
+               setRates({SEK: 1});
+               //Fallback till SEK
+               setCurrency("SEK");
+            }
+        
+        };
 
         fetchRates();
 
     }, []);
 
-    function convertPrice(price) {
-        return price * rates[currency];
-    }
 
-    const value = {currency,setCurrency,rates,convertPrice};
+
+        function convertPrice(price) {
+            return price * rates[effectiveCurrency];
+        }
+
+    const value = {currency,setCurrency,effectiveCurrency,rates,convertPrice};
 
     return (
         <CurrencyContext.Provider value={value}>
