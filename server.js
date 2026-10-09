@@ -8,8 +8,6 @@ import orderRoutes from "./routes/orderRoutes.js";
 import beatRoutes from "./routes/beatRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
 
-import { fetchJson } from "./lib/fetchJson.js";
-
 const app = express();
 
 const PORT = process.env.PORT || 3000;
