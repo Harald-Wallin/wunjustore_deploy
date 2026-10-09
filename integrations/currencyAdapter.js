@@ -16,13 +16,16 @@ const FrankfurterRatesSchema = z.object ({
 
 //CACHE
 const CACHE_DURATION = Number(process.env.CURRENCY_CACHE_SECONDS ?? 300) * 1000;
+// Map kan endast lagra "KEY:" + "VALUE:" 
+// !!!Value: KAN vara ett {objekt}!!!
 const cache = new Map();
 
 //base= om ingen "base" skickas in, kör på SEK
 //'base' är utgångsvalutan, 'symbols' är de som frankfurter ska skicka tillbaks
 export async function getRates(base = "SEK", symbols = ["SEK", "EUR", "USD"]){
 
-    // En unik nyckel för just denna valutaförfrågan
+    // En unik nyckel för just denna valutaförfrågan, t.ex "SEK:SEK,EUR,USD". Key används för att 
+    //hämta rätt/matchande cache- flera caches kan ju vara sparade samtidigt i "MAP();"
     const cacheKey = `${base}:${symbols.join(",")}`;
 
     // Finns ett tidigare sparat resultat?

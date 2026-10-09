@@ -8,6 +8,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 import beatRoutes from "./routes/beatRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
 
+import { fetchJson } from "./lib/fetchJson.js";
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -32,6 +34,7 @@ app.use("/api/albums", albumRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/beats", beatRoutes);
 app.use ("/api/currency", currencyRoutes);
+
 
 app.use((request, response) => {
   response.status(404).json({
