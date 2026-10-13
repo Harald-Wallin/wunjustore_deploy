@@ -2,6 +2,7 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import {getSupplierCsv, getSupplierProductsFromCsv} from "./integrations/supplierAdapter.js";
+import { normalizeSupplierProduct } from "./integrations/normalizeSupplierProduct.js";
 
 //Routes
 import albumRoutes from "./routes/albumRoutes.js";
@@ -50,12 +51,11 @@ app.get("/api/test/supplier-products", async (request, response) => {
 
     const products = await getSupplierProductsFromCsv();
 
-    console.log("Antal produkter:", products.length);
-    console.log("Första produkten:", products[0]);
+    const firstProduct = normalizeSupplierProduct(products[0]);
 
     response.json({
         count: products.length,
-        firstProduct: products[0]
+        firstProduct
     });
 });
 
