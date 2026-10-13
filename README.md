@@ -110,21 +110,54 @@ Jag har valt att använda branschen 'Kläder'("klader") i labben, som placeholde
 ### Refaktorering av fetchJson.js
 Refaktorerade 'fetchJson.js' till 'fetchWithRetry.js', och skapade sedan 'fetchJson.js' 2.0 som återanvänder fetchWithRetry.js men returnerar specifikt JSON.
 
+fetchWithRetry.js hanterar bland annat timeout, felhantering och återförsök vid tillfälliga problem med API-anrop.
+
+API-nyckeln ligger i .env och skickas från backend via HTTP-headern X-Api-Key.
+
 ### Normalisering, adapter, Zod
 Skapade:
 - supplierProductSchema.js (Zod)
 - normalizeSupplierProduct.js (normaliserar till projektets standard)
-- validateSupplierProducts.js (validerar och parsar produkter)
-- supplierAdapter.js (hämtar och parsar CSV)
+- validateSupplierProducts.js (validerar och delar upp (o)giltiga produkter)
+- supplierAdapter.js (hämtar och parsar CSV SAMT XML)
+- convertXmlProduct.js (konverterar XML-produkter till samma format som CSV-produkterna)
+
+CSV-filen avkodas med Windows-1252 > csv-parse
+XML-filen är utf-8 så den hämtas kompatibel > fast-xml-parser
+
+Båda formaten normaliseras alltså till samma interna struktur/modell innan de Zod-valideras
 
 ### Databas
-- Skapade 'inspectDatabase.js', 'runMigration.js', '001_create_supplier_products'
-som senare används för upsert. Dessa gör att man inte behöver gå in i t.ex pgAdmin varje gång en query ska köras, och vi får alla databasändringar sparade som kod i Git- mycket bra. 
+Skapade:
+- inspectDatabase.js
+- runMigration.js
+- 001_create_supplier_products.sql
+- 002_add_supplier_product_image.sql
+
+Dessa gör att man inte behöver gå in i t.ex pgAdmin varje gång en query ska köras, och vi får alla databasändringar sparade som kod i Git- mycket bra. 
+
+Jag skapade även tabellen "supplier_products" i postgreSQL, där sku används för att identifierar produkter vidf import.
 
 ### Importering
 Skapade:
-- importSupplierProducts.js
+- supplierProductService.js (kontrollerar om en produkt finns och upsertar den)
+- importSupplierProducts.js (hämtning, normalisering, validering, databasuppdatering + importstatistik)
+- supplierImportRoutes.js (expressroute)
 
-Kommandon: 
-- node runMigration.js (kör SQL-migrationen)
+### Kommandon
+- node runMigration.js <001_create...> eller <002_add...> (kör SQL-migrationen)
 - node inspectDatabase.js (Visa databasens tabeller och kolumner)
+
+
+### Integrering i frontend - *Endast PLACEHOLDER just nu* - ingen riktig merch!
+Min vision är att vi lägger till en "Merch"-page på webplatsen.
+Här listas alla produkter i form av productCards, precis som albumCards i "browse music"-page.
+Klickar man på ett productCard kommer man till productDetails-page, där man får mer info om produkten-
+t.ex lagersaldo, kan välja storlekar, kanske kort beskrivning osv.
+
+Om man är inloggad som admin finns nu en import-knapp, där admin får välja att importera som xml
+eller csv via en dropdown-meny.
+Som admin ser man också ImportDetails (eller dylikt): lite statistik över importen, t.ex hur många varor
+som faktiskt finns tillgängliga för kunder på hemsidan just nu, hur många produkter som uppdaterats och hur, och om någon import har misslyckats och varför.
+
+Jag tänker även att importen från supplier-API't ska ske automatiskt i framtiden, kanske en gång om dagen, plus att man manuellt kan importera produkterna, såklart.

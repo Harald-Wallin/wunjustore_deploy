@@ -11,6 +11,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import CheckoutPage from "../pages/CheckOutPage";
 import OrderConfirmationPage from "../pages/OrderConfirmationPage";
 import TrackListPage from "../pages/TrackListPage";
+import MerchPage from "../pages/MerchPage";
 
 //Kund-pages
 import CustomerOrderDetailsPage from "../pages/CustomerOrderDetailsPage";
@@ -44,6 +45,7 @@ function AppRoutes(){
                 <Route path="albums/:albumId" element={<TrackListPage />}/>
                 <Route path="about" element={<AboutPage />} />
                 <Route path ="cart" element={<CartPage />} />
+                <Route path="merch" element={<MerchPage />} />
 
                 {/*Logged in*/}
                 <Route element={<RequireAuth />}>

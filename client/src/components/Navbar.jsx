@@ -24,6 +24,8 @@ function Navbar(){
 
                 <li><NavLink to="/albums">Browse Music</NavLink></li>
 
+                <li><NavLink to="/merch">Merch</NavLink></li>
+
                 <li><NavLink to="/about">About</NavLink></li>
 
 
