@@ -99,3 +99,28 @@ samt ER-diagramet
 BONUS: Du hittar även lite mockData i client/src/data/MockAlbums.js ifall det är något du vill se.
 
 Tack för denna uppgift!
+
+
+# Labb 1
+
+### Refaktorering av fetchJson.js
+Refaktorerade 'fetchJson.js' till 'fetchWithRetry.js', och skapade sedan 'fetchJson.js' 2.0 som återanvänder fetchWithRetry.js men returnerar specifikt JSON.
+
+### Normalisering, adapter, Zod
+Skapade:
+- supplierProductSchema.js (Zod)
+- normalizeSupplierProduct.js (normaliserar till projektets standard)
+- validateSupplierProducts.js (validerar och parsar produkter)
+- supplierAdapter.js (hämtar och parsar CSV)
+
+### Databas
+- Skapade 'inspectDatabase.js', 'runMigration.js', '001_create_supplier_products'
+som senare används för upsert. Dessa gör att man inte behöver gå in i t.ex pgAdmin varje gång en query ska köras, och vi får alla databasändringar sparade som kod i Git- mycket bra. 
+
+### Importering
+Skapade:
+- importSupplierProducts.js
+
+Kommandon: 
+- node runMigration.js (kör SQL-migrationen)
+- node inspectDatabase.js (Visa databasens tabeller och kolumner)

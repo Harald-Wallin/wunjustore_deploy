@@ -5,6 +5,7 @@ import express from "express";
 import {getSupplierCsv, getSupplierProductsFromCsv} from "./integrations/supplierAdapter.js";
 import { normalizeSupplierProduct } from "./integrations/normalizeSupplierProduct.js";
 import { SupplierProductSchema } from "./integrations/supplierProductSchema.js";
+import { validateSupplierProducts } from "./integrations/validateSupplierProducts.js";
 
 //Routes
 import albumRoutes from "./routes/albumRoutes.js";
@@ -51,6 +52,20 @@ app.get("/api/test/supplier-csv", async (request, response) => {
 
 app.get("/api/test/supplier-products", async (request, response) => {
 
+    const rawProducts = await getSupplierProductsFromCsv();
+
+    const result = validateSupplierProducts(rawProducts);
+
+    response.json({
+        total: rawProducts.length,
+        valid: result.validProducts.length,
+        skipped: result.skippedProducts.length,
+        skippedProducts: result.skippedProducts
+    });
+});
+
+/*app.get("/api/test/supplier-products", async (request, response) => {
+
     const products = await getSupplierProductsFromCsv();
 
     const firstProduct = normalizeSupplierProduct(products[0]);
@@ -67,7 +82,7 @@ app.get("/api/test/supplier-products", async (request, response) => {
                 : validation.error.issues
         }
     });
-});
+});*/
 
 
 
