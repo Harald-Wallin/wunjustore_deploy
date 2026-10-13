@@ -1,8 +1,10 @@
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
+
 import {getSupplierCsv, getSupplierProductsFromCsv} from "./integrations/supplierAdapter.js";
 import { normalizeSupplierProduct } from "./integrations/normalizeSupplierProduct.js";
+import { SupplierProductSchema } from "./integrations/supplierProductSchema.js";
 
 //Routes
 import albumRoutes from "./routes/albumRoutes.js";
@@ -53,9 +55,17 @@ app.get("/api/test/supplier-products", async (request, response) => {
 
     const firstProduct = normalizeSupplierProduct(products[0]);
 
+    const validation = SupplierProductSchema.safeParse(firstProduct);
+
     response.json({
         count: products.length,
-        firstProduct
+        firstProduct,
+        validation: {
+            success: validation.success, //True/false
+            errors: validation.success   //vad som HÄNDER om success eller error
+                ? []
+                : validation.error.issues
+        }
     });
 });
 
