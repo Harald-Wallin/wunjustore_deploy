@@ -1,12 +1,18 @@
 import { getSupplierProductsFromCsv } from "../integrations/supplierAdapter.js";
-import { validateSupplierProducts } from "../integrations/validateSupplierProducts.js";
+import { getSupplierProductsFromXml } from "../integrations/supplierAdapter.js";
 
+import { validateSupplierProducts } from "../integrations/validateSupplierProducts.js";
 import {upsertSupplierProduct, supplierProductExists} from "./supplierProductService.js";
 
-export async function importSupplierProducts() {
+export async function importSupplierProducts(format = "csv"){//CSV = standardformatet
 
-    //Hämta leverantörens produkter
-    const rawProducts = await getSupplierProductsFromCsv();
+
+    if(format !== "csv" && format !== "xml"){
+        throw new Error("Formatet måste vara csv eller xml!");
+    }
+
+    //Hämta leverantörens produkter, om xml = ...FromXml(), om inte > ...FromCsv()
+    const rawProducts = format === "xml" ? await getSupplierProductsFromXml() : await getSupplierProductsFromCsv();
 
     //Normalisera + validera
     const { validProducts, skippedProducts } =

@@ -12,6 +12,7 @@ import albumRoutes from "./routes/albumRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import beatRoutes from "./routes/beatRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
+import supplierImportRoutes from "./routes/supplierImportRoutes.js";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("/api/albums", albumRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/beats", beatRoutes);
 app.use ("/api/currency", currencyRoutes);
+app.use("/api/admin/supplier", supplierImportRoutes);
 
 
 

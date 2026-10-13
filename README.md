@@ -103,6 +103,10 @@ Tack för denna uppgift!
 
 # Labb 1
 
+Jag har valt att använda branschen 'Kläder'("klader") i labben, som placeholder för eventuell framtida *merchandise*.
+
+## Steg
+
 ### Refaktorering av fetchJson.js
 Refaktorerade 'fetchJson.js' till 'fetchWithRetry.js', och skapade sedan 'fetchJson.js' 2.0 som återanvänder fetchWithRetry.js men returnerar specifikt JSON.
 

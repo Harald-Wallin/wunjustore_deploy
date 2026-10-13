@@ -1,7 +1,13 @@
 import {fetchWithRetry} from "../lib/fetchWithRetry.js"
+import { mapSupplierXmlProduct } from "./convertXmlPoduct.js";
+
 import { parse } from "csv-parse/sync";
+import { XMLParser } from "fast-xml-parser";
 
 const BASE_URL = "https://leverantor-api.vercel.app"
+
+
+//----------CSV------------
 
 export async function getSupplierCsv(){
 
@@ -53,4 +59,46 @@ export async function getSupplierProductsFromCsv(){
     })
 
     return products;
+}
+
+
+//---------XML----------
+
+export async function getSupplierXml() {
+    const url = new URL("/v1/export/products.xml", BASE_URL);
+
+    url.searchParams.set("bransch", "klader");
+
+    const response = await fetchWithRetry(url.toString(), {
+        headers: {
+            "X-Api-Key": process.env.SUPPLIER_API_KEY
+        }
+    });
+
+    //console.log("Content-Type:", response.headers.get("content-type"));
+
+    const buffer = await response.arrayBuffer();
+
+    //CSV'n var i windows1252, men denna xml är i utf-8, enligt header-datan
+    const decoder = new TextDecoder("utf-8");
+
+    return decoder.decode(buffer);
+}
+
+
+export async function getSupplierProductsFromXml(){
+    const xmlText = await getSupplierXml();
+
+    const parser = new XMLParser({
+        ignoreAttributes: false, //behåller attributer i elementen
+        parseTagValue: false, //Behåller värden som text, t.ex bra för ean så de inte blir Number
+        trimValues: true,
+        isArray: (tagName) => tagName === "produkt" || tagName === "variant" //produkt + variant blir alltid arrayer
+    });
+
+    const parsedXml = parser.parse(xmlText);
+
+    const xmlProducts = parsedXml.katalog?.produkt ?? [];
+
+    return xmlProducts.map(mapSupplierXmlProduct);
 }
