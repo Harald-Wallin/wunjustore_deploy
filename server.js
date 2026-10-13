@@ -1,6 +1,7 @@
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
+import {getSupplierCsv, getSupplierProductsFromCsv} from "./integrations/supplierAdapter.js";
 
 //Routes
 import albumRoutes from "./routes/albumRoutes.js";
@@ -32,6 +33,35 @@ app.use("/api/albums", albumRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/beats", beatRoutes);
 app.use ("/api/currency", currencyRoutes);
+
+
+
+app.get("/api/test/supplier-csv", async (request, response) => {
+
+    console.log("TEST: Express-routen har anropats!");
+
+    const csvText = await getSupplierCsv();
+
+    response.type("text/plain; charset=utf-8");
+    response.send(csvText);
+});
+
+app.get("/api/test/supplier-products", async (request, response) => {
+
+    const products = await getSupplierProductsFromCsv();
+
+    console.log("Antal produkter:", products.length);
+    console.log("Första produkten:", products[0]);
+
+    response.json({
+        count: products.length,
+        firstProduct: products[0]
+    });
+});
+
+
+
+
 
 
 app.use((request, response) => {

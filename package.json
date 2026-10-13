@@ -1,5 +1,5 @@
 {
-  "name": "fsu25d-systemutveckling-uppgift-1-min-egna-e-handel-harald-wallin",
+  "name": "wunjustore",
   "version": "1.0.0",
   "description": "E-commerce platform for previewing and purchasing beats",
   "type": "module",
@@ -28,6 +28,7 @@
   "homepage": "https://github.com/Medieinstitutet/fsu25d-systemutveckling-uppgift-1-min-egna-e-handel-Harald-Wallin#readme",
   "dependencies": {
     "cors": "^2.8.6",
+    "csv-parse": "^7.0.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pg": "^8.22.0",
