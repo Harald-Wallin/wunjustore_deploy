@@ -14,6 +14,7 @@ import beatRoutes from "./routes/beatRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
 import supplierImportRoutes from "./routes/supplierImportRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import searchRoutes from "./routes/searchRoutes.js";
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/beats", beatRoutes);
 app.use ("/api/currency", currencyRoutes);
 app.use("/api/admin/supplier", supplierImportRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/search", searchRoutes);
 
 
 
