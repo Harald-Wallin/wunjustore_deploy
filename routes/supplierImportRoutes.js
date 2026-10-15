@@ -1,5 +1,6 @@
 import express from "express";
 import { importSupplierProducts } from "../services/importSupplierProducts.js";
+import { syncProductsToAlgolia } from "../services/searchSyncService.js";
 
 const router = express.Router();
 
@@ -16,6 +17,22 @@ router.post("/import", async (req, res, next) => {
         const result = await importSupplierProducts(format);
 
         res.json(result);
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+//".../api/admin/supplier/search/sync"
+//synkar databasens produkter till algolia
+router.post("/search/sync", async (req, res, next) => {
+    try {
+        const result = await syncProductsToAlgolia();
+
+        res.json({
+            message: "Search index updated successfully!",
+            ...result
+        });
 
     } catch (error) {
         next(error);

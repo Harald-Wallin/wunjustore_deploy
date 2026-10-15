@@ -8,6 +8,11 @@ function SupplierImportPanel({ onImportComplete }) {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
 
+    //algolia-sync
+    const [syncLoading, setSyncLoading] = useState(false);
+    const [syncResult, setSyncResult] = useState(null);
+    const [syncError, setSyncError] = useState(null);
+
     async function handleImport(event) {
         event.preventDefault();
 
@@ -50,6 +55,41 @@ function SupplierImportPanel({ onImportComplete }) {
         }
     }
 
+    //algolia sync
+    async function handleSync() {
+
+        setSyncLoading(true);
+        setSyncError(null);
+        setSyncResult(null);
+
+        try {
+            const response = await fetch(`${API_URL}/api/admin/supplier/search/sync`,
+                {
+                    method: "POST"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || data.error || "Algolia sync failed"
+                );
+            }
+
+            setSyncResult(data);
+
+        } catch (error) {
+            console.error("Algolia sync failed:", error);
+            setSyncError(error.message);
+
+        } finally {
+            setSyncLoading(false);
+        }
+    }
+
+
+
     return (
         <section className="supplier-import-panel">
 
@@ -73,8 +113,12 @@ function SupplierImportPanel({ onImportComplete }) {
                     <option value="xml">XML</option>
                 </select>
 
-                <button type="submit" disabled={loading}>
+                <button type="submit" disabled={loading || syncLoading}>
                     {loading ? "Importing..." : "Import products"}
+                </button>
+
+                <button type="button" onClick={handleSync} disabled={loading || syncLoading}>
+                    {syncLoading ? "Syncing..." : "Sync Algolia"}
                 </button>
 
             </form>
@@ -85,31 +129,42 @@ function SupplierImportPanel({ onImportComplete }) {
                 </p>
             )}
 
-            {result && (
-                <div className="supplier-import-result">
+            {result && (<div className="supplier-import-result">
 
-                    <h3>Import completed!</h3>
+                <h3>Import completed!</h3>
 
-                    <p>Total products: {result.total}</p>
-                    <p>Created: {result.created}</p>
-                    <p>Updated: {result.updated}</p>
-                    <p>Skipped: {result.skipped}</p>
+                <p>Total products: {result.total}</p>
+                <p>Created: {result.created}</p>
+                <p>Updated: {result.updated}</p>
+                <p>Skipped: {result.skipped}</p>
 
-                    {result.skippedProducts?.length > 0 && (
-                        <div>
-                            <h4>Skipped products</h4>
+                {result.skippedProducts?.length > 0 && (
+                    <div>
+                        <h4>Skipped products</h4>
 
-                            <ul>
-                                {result.skippedProducts.map((product, index) => (
-                                    <li key={`${product.sku}-${index}`}>
-                                        <strong>{product.sku}</strong>
-                                        {": "}
-                                        {product.reasons.join(", ")}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                        <ul>
+                            {result.skippedProducts.map((product, index) => (
+                                <li key={`${product.sku}-${index}`}>
+                                    <strong>{product.sku}</strong>
+                                    {": "}
+                                    {product.reasons.join(", ")}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+            </div>)}
+
+            {syncError && (<p className="form-error" role="alert">{syncError}</p>)}
+
+            {syncResult && (
+                <div className="supplier-sync-result">
+
+                    <h3>Search index updated!</h3>
+
+                    <p>Total products: {syncResult.total}</p>
+                    <p>Indexed: {syncResult.indexed}</p>
 
                 </div>
             )}

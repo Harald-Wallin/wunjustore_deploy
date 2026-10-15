@@ -161,3 +161,12 @@ Som admin ser man också ImportDetails (eller dylikt): lite statistik över impo
 som faktiskt finns tillgängliga för kunder på hemsidan just nu, hur många produkter som uppdaterats och hur, och om någon import har misslyckats och varför.
 
 Jag tänker även att importen från supplier-API't ska ske automatiskt i framtiden, kanske en gång om dagen, plus att man manuellt kan importera produkterna, såklart.
+
+---
+
+# Labb 2
+
+Implementering av sökfunktionen Algolia.
+Huvudkonceptet är att den initiala produkt-fetchen fortfarande hämtas från databasen, och algolia endast ansvarar över funktionaliteten. Lite självklart kanske, men jag var lite inne på att låta algolia sköta även visningen över ALLA produkter när söktext saknades- men jag valde att låta db stå för "single source of truth" så långt det går.
+
+### Refaktorering av 
