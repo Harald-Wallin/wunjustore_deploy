@@ -265,7 +265,7 @@ OBS!!!*Detta är inte en fullständig autentiseringslösning!!*
 Under utveckling är dessa endpoints tillgängliga utan serverroll-auth.
 
 Kör i terminal:
--  $env:NODE_ENV = "development"
+- $env:NODE_ENV = "development"
 - $env:NODE_ENV = "production"
 
 ## Framtida visioner
