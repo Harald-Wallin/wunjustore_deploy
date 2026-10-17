@@ -1,8 +1,14 @@
 import express from "express";
 import { importSupplierProducts } from "../services/importSupplierProducts.js";
-import { syncProductsToAlgolia } from "../services/searchSyncService.js";
+import { fullSyncProductsToAlgolia} from "../services/searchSyncService.js";
+
+//Adminskydd
+import { localOnly } from "../middleware/localOnly.js";
 
 const router = express.Router();
+
+//Adminskydd
+router.use(localOnly);
 
 router.post("/import", async (req, res, next) => {
     try {
@@ -27,7 +33,7 @@ router.post("/import", async (req, res, next) => {
 //synkar databasens produkter till algolia
 router.post("/search/sync", async (req, res, next) => {
     try {
-        const result = await syncProductsToAlgolia();
+        const result = await fullSyncProductsToAlgolia();
 
         res.json({
             message: "Search index updated successfully!",

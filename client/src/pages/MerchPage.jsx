@@ -57,9 +57,11 @@ function MerchPage() {
 
             const response = await fetch(url, {signal});
 
-            if (!response.ok) {
-                throw new Error("Could not fetch products ):");
-            }
+            if (!response.ok){
+
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.error || errorData?.message || "Could not fetch products ):");
+                }
 
 
             const result = await response.json();
@@ -151,6 +153,12 @@ function MerchPage() {
                 />
 
             </div>
+            
+            {!loading && !error && (
+            <p className="merch-results-count">
+                {totalProducts} {totalProducts === 1 ? "product" : "products"} found
+            </p>
+)}
 
             {loading ?(
                 <p>Loading products...</p>

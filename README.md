@@ -164,9 +164,113 @@ Jag tänker även att importen från supplier-API't ska ske automatiskt i framti
 
 ---
 
-# Labb 2
+# Labb 2 – Sök-API med Algolia
 
-Implementering av sökfunktionen Algolia.
-Huvudkonceptet är att den initiala produkt-fetchen fortfarande hämtas från databasen, och algolia endast ansvarar över funktionaliteten. Lite självklart kanske, men jag var lite inne på att låta algolia sköta även visningen över ALLA produkter när söktext saknades- men jag valde att låta db stå för "single source of truth" så långt det går.
+I Labb 2 har jag implementerat sökfunktionalitet med Algolia, integrerat med den befintliga produktdatabasen från Labb 1.
 
-### Refaktorering av 
+Jag har valt att behålla databasen som Single Source of Truth, medan Algolia står för fritextsökning och paginering av sökresultat.
+När användaren besöker merchandise-sidan utan att skriva någon söktext hämtas produkterna från databasen via backend. När användaren börjar söka skickas begäran i stället till vårt eget sök-API, som kommunicerar med Algolia.
+Alltså:
+- Vanlig produktvisning: React → Express → PostgreSQL
+- Sökning: React → Express → Algolia
+- Produktändringar: Admin → Express → PostgreSQL → Algolia
+
+Frontend kommunicerar alltså aldrig direkt med Algolia.
+
+## Algolia – adapter och API
+
+Jag skapade 'searchAdapter.js', som ansvarar för kommunikationen med Algolia.
+Adaptern innehåller bl.a:
+
+- 'indexProducts()' – skapar eller uppdaterar produkter i sökindexet
+- 'replaceAllProducts()' – ersätter hela sökindexets innehåll
+- 'searchProducts()' – söker efter produkter och returnerar paginerade resultat
+- 'deleteProductFromIndex()' – tar bort en produkt från sökindexet
+
+Produkterna konverteras till Algolias format innan de indexeras.
+
+### Sök-API och validering
+
+Jag skapade 'searchRoutes.js' med endpointen 'GET /api/search?q=hoodie&page=1&pageSize=12'
+Sökningen stödjer fritext, sidnummer och antal produkter per sida.
+
+Om Algolia inte kan nås returnerar backend HTTP 502 med felmeddelande.
+Jag har även konfigurerat timeout-inställningar för Algolia-klienterna.
+
+## Synkronisering mellan databasen och Algolia
+
+En viktig del av labben har varit att hålla Algolias sökindex uppdaterat när produkter ändras i databasen.
+Jag valde att låta databasen uppdateras först och därefter synkronisera ändringen till Algolia.
+
+### Automatisk synkronisering
+
+Algolia uppdateras automatiskt när produkter:
+
+- Importeras från leverantören
+- Skapas manuellt
+- Uppdateras
+- Raderas
+
+Vid vanlig indexering används `saveObjects()` för att skapa eller uppdatera sökposter. Vid borttagning används `deleteObject()`.
+
+### Manuell fullsynkronisering
+
+Jag lade även till en separat 'Sync Algolia'-knapp för admin.
+
+Till en början använde jag 'replaceAllObjects()' även vid vanlig import, eftersom jag ville säkerställa att gamla sökposter som inte längre fanns i databasen togs bort. Problemet var att synkroniseringen då kunde ta gott och väl över två minuter - dåligt.
+
+Lösningen blev att separera vanlig synkronisering från fullständig synkronisering:
+- Automatisk synk: 'saveObjects()' med 'waitForTasks: false'
+- Manuell fullsynk: 'replaceAllObjects()'
+
+Den vanliga importenbehöver alltså inte vänta på att Algolia färdigbehandlar alla indexeringsuppgifter.
+
+'waitForTasks: false' innebär dock att en lyckad begäran inte garanterar att produkterna redan är sökbara, utan att Algolia har tagit emot indexeringsbegäran.
+
+## CRUD och adminpanel
+
+Jag har implementerat ett enklare CRUD-API för produkterna:
+
+POST: '/api/admin/products' -Skapa produkt
+PATCH: '/api/admin/products/:sku' -Uppdatera produktens namn/pris
+DELETE: '/api/admin/products/:sku' -Radera produkt
+
+Alla tre operationer uppdaterar PostgreSQL först och skickar därefter motsvarande ändring till Algolia.
+
+Jag har även byggt en liten, tillfällig produkthantering i SupplierImportPanel, där admin kan använda crud direkt från gränssnittet.
+
+OBS!!! *Detta är inte tänkt som den slutgiltiga produktadministrationen!*
+
+Min framtida vision är att admin ska kunna skapa produkter direkt från Merchandise-sidan och redigera/radera dem via en 'ProductDetailsPage'/ modal, på liknande sätt som hanteringen av musikprodukter.
+
+### Testprodukt
+
+För CRUD-testerna har jag använt produkten `DEMO-001`, som alltås inte ingår i leverantörens importfil.
+På så sätt riskerar inte nästa leverantörsimport att skriva över testprodukten.
+
+## Integrering i React
+
+När användaren skriver en söktext anropas '/api/search', och Algolia ansvarar för sökresultat och pagineringen .Frontend visar även det totala antalet produkter/sökträffar.
+
+Jag använder 'AbortController' för att avbryta äldre sökbegäranden när användaren ändrar söktext eller byter sida (tog ett tag för mig att fatta detta, osäker på om jag faktiskt gjorde det..).
+
+Efter en produktimport eller CRUD-operation hämtar React produktinformationen igen.
+
+## Säkerhet och adminskydd
+
+Jag har skapat middleware-funktionen 'localOnly', som tillfälligt skyddar admin-endpoints.
+När 'NODE_ENV=production' returnerar dessa endpoints HTTP 403.
+
+OBS!!!*Detta är inte en fullständig autentiseringslösning!!* 
+Under utveckling är dessa endpoints tillgängliga utan serverroll-auth.
+
+Kör i terminal:
+-  $env:NODE_ENV = "development"
+- $env:NODE_ENV = "production"
+
+## Framtida visioner
+
+Den nuvarande produktadministrationen är en tillfällig lösning specifikt för labben.
+Jag vill bygga en mer komplett Merchandise-del med produktdetaljer, varianter, lagersaldo och ett integrerat CRUD-gränssnitt (ProductPage som visar alla ProductCards (som idag), klickar man på ett producCard > ProductDetailsPage där admin har edit/delete-funktionaliteter).
+
+Jag vill även automatisera leverantörsimporten, exempelvis genom att köra den en gång per dygn.
