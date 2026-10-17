@@ -138,6 +138,14 @@ function SupplierImportPanel({ onImportComplete }) {
                 <p>Updated: {result.updated}</p>
                 <p>Skipped: {result.skipped}</p>
 
+                {result.searchSync?.success ?(
+                    <p>Algolia sync. submitted. Products: {String(result.searchSync.indexed)}</p>
+                ) : (
+                    <p className = "form-error" role="alert">
+                        Products imported but Algolia was not updated
+                    </p>
+                )}
+
                 {result.skippedProducts?.length > 0 && (
                     <div>
                         <h4>Skipped products</h4>
