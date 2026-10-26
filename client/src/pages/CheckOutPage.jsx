@@ -7,6 +7,11 @@ import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
 import { useCurrency } from "../context/CurrencyContext";
 
+//Stripe (sdk)
+import {EmbeddedCheckoutProvider, EmbeddedCheckout} from "@stripe/react-stripe-js";
+
+import {stripePromise} from "../stripe";
+
 function CheckoutPage() {
 
     const {
@@ -22,52 +27,49 @@ function CheckoutPage() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
+    const [clientSecret, setClientSecret] = useState(null);
 
     async function handlePlaceOrder() {
         try {
             setIsSubmitting(true);
             setError(null);
 
-            //plockar ur beat.id så att endast denna data skickas till order (inget överflöd)
-            const beatIds = cartItems.map(
-                (currentBeat) => currentBeat.id
-            );
+            //anpassa varukorgen till backendendformat (zod, orderrader)
+            const checkoutItems = cartItems.map((item) => ({
+                productType: item.productType,
+                productId: item.productId,
+                quantity: item.quantity
+            }));
 
-
-            const response = await fetch(
-                `${API_URL}/api/orders`,
-                {
-                    method: "POST",
-
-                    headers: {"Content-Type": "application/json"},
-
-                    body: JSON.stringify({
-                        userId: currentUser.id,
-                        beatIds: beatIds
-                    })
-                }
-            );
+            //anropa egen Express-backend
+            const response = await fetch(`${API_URL}/api/checkout`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    cartItems: checkoutItems
+                })
+            });
 
             const data = await response.json();
 
-            if (!response.ok){
-                throw new Error(data.message || "Could not create order");
-            };
+            if (!response.ok) {
+                throw new Error(data.error || "Could not start checkout");
+            }
 
-            const orderId = data.order.id;
+            //Spara resultatfrån backend
+            setClientSecret(data.clientSecret);
 
-            clearCart();
-            //Navigate, som Link fast lotsar vidare användaren automatiskt
-            navigate(`/orders/${orderId}/confirmation`);
-
-        } catch (error){
-            console.error("Failed to place order:",error);
+        } catch (error) {
+            console.error("Failed to start checkout:", error);
             setError(error.message);
 
         } finally {
             setIsSubmitting(false);
-        };
-    };
+        }
+    }
 
 
     //måste vara inloggad som customer
@@ -76,7 +78,7 @@ function CheckoutPage() {
             <section>
                 <h1>Checkout</h1>
 
-                <p>You need to be logged in as a customer to place an order.</p>
+                <p>You need to be logged in as a customer to place an order</p>
                 <Link to="/albums">Back to music</Link>
             </section>
         );
@@ -87,7 +89,7 @@ function CheckoutPage() {
             <section>
                 <h1>Checkout</h1>
 
-                <p>Your cart is empty.</p>
+                <p>Your cart is empty</p>
 
                 <Link to="/albums">
                     Browse music
@@ -103,20 +105,24 @@ function CheckoutPage() {
 
             <div className="checkout-items">
 
-                {cartItems.map((currentBeat) => (
-                    <article key={currentBeat.id} className="checkout-item">
-                        <img
-                            src={currentBeat.albumCover}
-                            alt={`Cover for ${currentBeat.albumName}`}
-                        />
+                {cartItems.map((item) => (
+
+                    <article key={`${item.productType}-${item.productId}`} className="checkout-item">
+
+                        <img src={item.image} alt={item.name}/>
 
                         <div>
-                            <h2>{currentBeat.beatName}</h2>
-                            <p>{currentBeat.albumName}</p>
-                            <p>Price: {convertPrice(currentBeat.beatPrice).toFixed(2)} {currency}</p>
+                            <h2>{item.name}</h2>
+
+                            {item.productType === "beat" && (<p>{item.albumName}</p>)}
+
+                            {item.productType === "merch" && (<p>Quantity: {item.quantity}</p>)}
+
+                            <p>Price: {convertPrice(item.price * item.quantity).toFixed(2)} {currency}</p>
                         </div>
+
                     </article>
-                ))};
+                ))}
             </div>
 
 
@@ -127,15 +133,15 @@ function CheckoutPage() {
 
             {error && (<p>{error}</p>)}
 
-            {/*Lite UX som FAKTISKT fångar eventuellt fel: att kunden spam-klickar innan servern
-            hinner svara och lägger flera identiska ordrar förhindras när knappen disable'as!!*/}
-            <button
-                type="button"
-                onClick={handlePlaceOrder}
-                disabled={isSubmitting}
-            >
-                {isSubmitting ? "Placing order..." : "Place order"}
-            </button>
+            {clientSecret ? (
+                <EmbeddedCheckoutProvider stripe = {stripePromise} options = {{clientSecret}}>
+                    <EmbeddedCheckout />
+                </EmbeddedCheckoutProvider>
+            ):(
+                <button type = "button" onClick = {handlePlaceOrder} disabled = {isSubmitting}>
+                    {isSubmitting ? "Starting Checkout" : "Proceed to payment"}
+                </button>
+            )}
 
         </section>
     );

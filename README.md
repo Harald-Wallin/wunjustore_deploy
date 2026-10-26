@@ -274,3 +274,31 @@ Den nuvarande produktadministrationen är en tillfällig lösning specifikt för
 Jag vill bygga en mer komplett Merchandise-del med produktdetaljer, varianter, lagersaldo och ett integrerat CRUD-gränssnitt (ProductPage som visar alla ProductCards (som idag), klickar man på ett producCard > ProductDetailsPage där admin har edit/delete-funktionaliteter).
 
 Jag vill även automatisera leverantörsimporten, exempelvis genom att köra den en gång per dygn.
+
+
+
+# Labb 3 - Stripe-integration
+
+## Flöde
+1. Kund lägger produkter i varukorg- ingen reservation läggs på produkterna.
+2. Kund går vidare till 'checkoutPage' - HÄR reserveras produkterna i 30min.
+3. En order med status 'pending' skaps > Stripe checkout session.
+4. Kunden har 30min på sig att betala - ser detta som en mätare + varning då ca 5min återstår.
+5A. Stripe skickar webhook, backend markerar order som 'paid' > genomfört köp
+5B. Checkoutsession löper ut, backend hanterar ordern som 'cancelled' och återställer lagersaldo.
+
+## Reservationer av produkter
+1. Kund lägger en produkt i varukorgen - ingenting händer med saldot
+2. Kund klickar på checkout - backend kollar + minskar saldot
+3A. Kund betalar - order = paid, lagersaldo förblir minskat
+3B. Kund avbryter/checkout timeout - order = cancelled, lagersaldo återställs
+
+## Leverantörsimport & saldo
+
+Efter lite tänkande valde jag att låta importen fortsätta skriva över lagersaldo- en enkel nollställning vid testning.
+
+
+## Refaktoreringar
+- orderService.CreateOrder: createOrder() går nu från att ha skapat en order och sedan skicka kunden till orderbekräftelse till att endast skapa en order med cartItems, och status 'pending'
+- CheckOutPage.jsx: gick från att hantera den gamla checkout'en till Stripes embedded' checkout
+- CartContext: implementerat gemensam produktstruktur och hantering för både beats och "merch"

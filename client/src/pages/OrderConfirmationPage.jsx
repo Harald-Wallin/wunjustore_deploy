@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import API_URL from "../config/api";
 
 import { useCurrency } from "../context/CurrencyContext";
+import { useCart } from "../context/CartContext";
 
 function OrderConfirmationPage() {
 
     //hämtar :orderId från url
     const { orderId } = useParams();
     const {currency, convertPrice} = useCurrency();
+    const { clearCart } = useCart();
 
     //state
     const [order, setOrder] = useState(null);
@@ -18,6 +20,7 @@ function OrderConfirmationPage() {
 
 
     useEffect(() => {
+        let intervalId;
         async function fetchOrder() {
             try {
                 const response = await fetch(`${API_URL}/api/orders/${orderId}`);
@@ -29,6 +32,11 @@ function OrderConfirmationPage() {
                 };
 
                 setOrder(data.order);
+                setError(null);
+
+                if (data.order.status !== "pending"){
+                    clearInterval(intervalId);
+                }
 
             } catch (error){
 
@@ -41,10 +49,22 @@ function OrderConfirmationPage() {
 
         fetchOrder();
 
+        intervalId = setInterval(fetchOrder, 3000);
+        return () => clearInterval(intervalId);
+
     }, [orderId]);//re-rendas alltså varje gång orderId ändras
 
+    //rensar kundkorgen vid lyckat genomfört köp
+    useEffect(() => {
 
-//loading
+        if (order?.status === "paid") {
+            clearCart();
+        }
+
+    }, [order?.status]);
+
+
+    //loading
     if (loading) {
         return (
             <section>
@@ -70,37 +90,59 @@ function OrderConfirmationPage() {
     return (
         <section className="order-confirmation">
 
-            <h1>Thank you for your order!</h1>
+            <h1>
+                {order.status === "paid" ? "Thank you for buying stuff at WUNJU!"
+                    : order.status === "pending" ? "Waiting for your payment confirmation..." 
+                    : "Order cancelled ):"}
+            </h1>
 
             <div className="order-confirmation_info">
 
                 <p> Order #{order.id}</p>
+                <p>Payment status : {order.status}</p>
                 <p>Customer: {order.customer.name}</p>
                 <p>Email: {order.customer.email}</p>
             </div>
 
-            <h2>Your beats</h2>
+            <h2>Your items</h2>
 
             <div className="order-confirmation_items">
 
-                {order.items.map((currentItem) => (
+                {order.items.map((currentItem, index) => (
 
-                    <article key={currentItem.beatId} className="order-confirmation_item">
+                    <article key={index} className="order-confirmation_item">
 
-                        <img
-                            className="order-confirmation_cover"
-                            src={currentItem.albumCover}
-                            alt={`Cover for ${currentItem.albumName}`}
-                        />
+                        {currentItem.productType === "beat" ? (
 
-                        <div className="order-confirmation_item-info">
+                            <>
+                                <img
+                                    className="order-confirmation_cover"
+                                    src={currentItem.albumCover}
+                                    alt={`Cover for ${currentItem.albumName}`}
+                                />
 
-                            <h3>{currentItem.beatName}</h3>
-                            <p>{currentItem.albumName}</p>
-                            <p>{convertPrice(currentItem.unitPrice).toFixed(2)} {currency}</p>
-                        </div>
+                                <div className="order-confirmation_item-info">
+
+                                    <h3>{currentItem.beatName}</h3>
+                                    <p>{currentItem.albumName}</p>
+                                    <p>{convertPrice(currentItem.unitPrice).toFixed(2)} {currency}</p>
+
+                                </div>
+                            </>
+
+                        ):(
+
+                            <div className="order-confirmation_item-info">
+
+                                <h3>{currentItem.productName}</h3>
+                                <p>Quantity: {currentItem.quantity}</p>
+                                <p>{convertPrice(currentItem.unitPrice).toFixed(2)} {currency} each</p>
+
+                            </div>
+
+                        )}
+
                     </article>
-
                 ))}
 
             </div>
