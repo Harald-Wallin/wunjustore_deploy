@@ -1,6 +1,6 @@
 import { createOrder} from "./orderService.js";
 import { createCheckoutSession } from "./stripeService.js";
-import pool from "../db.js";
+import pool from "../database/db.js";
 
 async function startCheckout(userId, cartItems) {
 
