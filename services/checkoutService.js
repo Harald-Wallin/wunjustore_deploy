@@ -1,6 +1,6 @@
-import { createOrder, cancelOrder } from "./orderService.js";
+import { createOrder} from "./orderService.js";
 import { createCheckoutSession } from "./stripeService.js";
-import pool from "../db.js"; // Anpassa till din befintliga pool-import
+import pool from "../db.js";
 
 async function startCheckout(userId, cartItems) {
 

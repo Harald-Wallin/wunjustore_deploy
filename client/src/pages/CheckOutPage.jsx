@@ -17,13 +17,10 @@ function CheckoutPage() {
     const {
         cartItems,
         totalPrice,
-        clearCart
     } = useCart();
 
     const {currentUser} = useUser();
     const {currency, convertPrice} = useCurrency();
-
-    const navigate = useNavigate();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
