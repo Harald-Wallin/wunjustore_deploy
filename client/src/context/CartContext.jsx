@@ -121,14 +121,14 @@ function CartProvider ({children}) {
     
     //"Verktygslåda" vi skickar med
     const value = {
-    cartItems,
-    addBeatToCart,
-    addAlbumToCart,
-    addMerchToCart,
-    removeFromCart,
-    clearCart,
-    totalPrice
-};
+        cartItems,
+        addBeatToCart,
+        addAlbumToCart,
+        addMerchToCart,
+        removeFromCart,
+        clearCart,
+        totalPrice
+    };
 
     return(
         <CartContext.Provider value={value}>
