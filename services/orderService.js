@@ -136,6 +136,7 @@ async function createOrder(userId, cartItems) {
             id,
             user_id AS "userId",
             order_total::float AS "orderTotal",
+            status,
             created_at AS "createdAt";
             `,[userId, orderTotal]
         );
@@ -335,4 +336,65 @@ async function getOrdersByUserId(userId) {
     return result.rows;
 }
 
-export { createOrder, getOrderById, getAllOrders, getOrdersByUserId };
+async function cancelOrder(orderId, sessionId = null){
+    const client = await pool.connect();
+
+    try{
+        await client.query("BEGIN");
+
+            //kollar så att orderId och stripe session ID matchar (och att ordern är "pending" innan avbrott)
+            const orderResult = await client.query(`
+                UPDATE orders
+                SET status = 'cancelled'
+                WHERE id = $1
+                AND status = 'pending'
+                AND stripe_session_id = $2
+                RETURNING id;`,
+            [orderId, sessionId]);
+
+            if (orderResult.rows.length === 0){
+                await client.query("COMMIT");
+                return;
+            }
+
+            const itemsResult = await client.query(`
+                SELECT supplier_product_id, quantity
+                FROM order_items
+                WHERE order_id = $1
+                AND supplier_product_id IS NOT NULL;`,
+            [orderId]);
+
+            for (const item of itemsResult.rows){
+                await client.query(`
+                    UPDATE supplier_product
+                    SET stock = stock + $1
+                    WHERE id = $2;`,
+                [item.quantity, item.supplier_product_id]);
+            }
+
+        await client.query("COMMIT");
+
+    } catch(error){
+
+        await client.query("ROLLBACK");
+        throw error;
+    }finally{
+        client.release();
+    }
+}
+
+async function markOrderAsPaid(orderId, sessionId){
+
+    const result = await pool.query(`
+        UPDATE orders
+        SET status = 'paid'
+        WHERE id = $1
+        AND status = 'pending'
+        AND stripe_session_id = $2
+        RETURNING id;`, 
+    [orderId, sessionId]);
+
+    return result.rows.length > 0;
+}
+
+export { createOrder, getOrderById, getAllOrders, getOrdersByUserId, cancelOrder, markOrderAsPaid};

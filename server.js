@@ -16,6 +16,8 @@ import supplierImportRoutes from "./routes/supplierImportRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import searchRoutes from "./routes/searchRoutes.js";
 import adminProductRoutes from "./routes/adminProductRoutes.js";
+import checkoutRoutes from "./routes/checkoutRoutes.js";
+import stripeWebhookRoutes from "./routes/stripeWebhookRoutes.js";
 
 const app = express();
 
@@ -27,6 +29,10 @@ app.use(
     origin: CLIENT_URL,
   }),
 );
+
+//stripe webhook route- ligger före express.json för att hooken använder rå data och ska INTE
+//omvandlas till json!
+app.use("/api/stripe/webhook", stripeWebhookRoutes);
 
 app.use(express.json());
 
@@ -45,6 +51,7 @@ app.use("/api/admin/supplier", supplierImportRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/admin/products", adminProductRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 
 
