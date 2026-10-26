@@ -7,8 +7,7 @@ function CartPage(){
 
     //Importerar contexten från CartContext-lådan  
     const {cartItems,
-        removeBeatFromCart,
-        clearCart,
+        removeFromCart,
         totalPrice
     } = useCart();
 
@@ -35,20 +34,29 @@ function CartPage(){
             {/*Själva varukorgslistan*/}
             <div className="cart-list">
 
-                {cartItems.map((currentBeat) => (
+                {cartItems.map((item) => (
                     /*Intern extra-return för att vi kör kod innuti map()*/
-                    <article key={currentBeat.id} className="cart-item">
+                    <article key={`${item.productType}-${item.productId}`} className="cart-item">
                         
-                        <Link to={`/albums/${currentBeat.albumId}`} className="album-card_cover-link">
-                            <img className="cart-item_image" src={currentBeat.albumCover} alt="Album Cover" />
-                        </Link>
+                        {item.producType === "beat" ? (
+                            <Link to={`/albums/${currentBeat.albumId}`} className="album-card_cover-link">
+                                <img className="cart-item_image" src={currentBeat.albumCover} alt="Album Cover" />
+                            </Link>
 
-                        <h2>{currentBeat.beatName}</h2>
+                        ):(
+                            <img className ="cart-item_image" src ={item.image} alt={item.name} />
+                        )}
+
+                        <h2>{item.name}</h2>
                         {/*<p>{currentBeat.albumName}</p>*/}
-                        <p className="cart-item_price">Price: {convertPrice(currentBeat.beatPrice).toFixed(2)} {currency}</p>
+                        <p className="cart-item_price">Price: {convertPrice(item.price).toFixed(2)} {currency}</p>
+
+                        {item.productType === "merch" && (
+                            <p>Quantity : {item.quantity}</p>
+                        )}
 
                         <button type="button" 
-                            onClick={()=> removeBeatFromCart(currentBeat.id)}>
+                            onClick={()=> removeFromCart(item.productType, item.productId)}>
                             Remove
                         </button>
                     </article>

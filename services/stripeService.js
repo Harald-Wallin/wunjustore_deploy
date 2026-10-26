@@ -12,7 +12,7 @@ async function createCheckoutSession(order){
                 price_data:{
                     currency: "sek",
                     product_data: {
-                        name:`Order #&{order.id}`
+                        name:`Order #${order.id}`
                     },
 
                     unit_amount: Math.round(order.orderTotal * 100)
@@ -24,8 +24,11 @@ async function createCheckoutSession(order){
 
         client_reference_id: String(order.id),
 
-        return_url:`${process.env.FRONTEND_URL}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+        //Dit kunden skickas efter checkout. Stripe ersätter  {CHECKOUT_SESSION_ID}
+        return_url:`${process.env.FRONTEND_URL}/orders/${order.id}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+        redirect_on_completion: "always",
         expires_at: Math.floor(Date.now() / 1000) + 30 * 60 //30 minuter
+
     },{
         idempotencyKey: `checkout-order-${order.id}`//Förhindrar oavsiktliga dubbel-sessions för betalningar
     });

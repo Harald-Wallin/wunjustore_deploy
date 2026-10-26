@@ -9,50 +9,102 @@ function CartProvider ({children}) {
     //Add BEAT to cart
     function addBeatToCart(beat){
 
-        /*Catch ifall beatet redan finns i varukorgen, ingen idé att köpa plural,
-        kanske ev. om man vill kunna "gifta" bort ett beat till nån i framtiden.
+        setCartItems((currentCartItems) => {
 
-        'Some' loopar precis som map igenom alla items innuti, i detta fall 'CartItems' 
-        och returnerar bool "true" vid matchning. Skriver detta för självpedagogik..*/
-        const beatAlreadyInCart = cartItems.some(
-            (currentBeat) => currentBeat.id === beat.id
-        );
+            /*Catch ifall beatet redan finns i varukorgen, ingen idé att köpa plural,
+            kanske ev. om man vill kunna "gifta" bort ett beat till nån i framtiden.
 
-        /*Avbryter alltså funktionen innan serCartItems om some hittar ett beat som 
-        redan ligger i varukorg. Ska skriva en alert eller något med returnen nedan för bra UX*/
-        if (beatAlreadyInCart) {
-            return;
-        };
-
-        //Skapar ny array med alla items från cartItems + 'beat'-prop'en
-        setCartItems([...cartItems, beat]);
-    };
-
-
-    //Add ALBUM to cart
-    function addAlbumToCart(album){
-        setCartItems((currentCartItems) =>{
-
-            //Lägger endast till beats som inte redan finns i cart
-            const newBeats = album.beats.filter(
-                (albumBeat) => !currentCartItems.some(
-                    (cartBeat) => cartBeat.id === albumBeat.id
-                )
+            'Some' loopar precis som map igenom alla items innuti, i detta fall 'CartItems' 
+            och returnerar bool "true" vid matchning*/
+            const beatAlreadyInCart = cartItems.some(
+                (item) => item.productType === "beat" && item.productId === beat.id
             );
 
-            const updatedCart = [...currentCartItems, ...newBeats];
-            return updatedCart;
+            /*Avbryter alltså funktionen innan serCartItems om some hittar ett beat som 
+            redan ligger i varukorg. Ska skriva en alert eller något med returnen nedan för bra UX*/
+            if (beatAlreadyInCart) {
+                return currentCartItems;
+            };
+
+            const newBeat = {
+                productType: "beat",
+                productId: beat.id,
+                quantity: 1,
+                name: beat.beatName,
+                price: Number(beat.beatPrice),
+                image: beat.albumCover,
+                albumId: beat.albumId,
+                albumName: beat.albumName
+            };
+
+            //Skapar ny array med alla items från cartItems + 'beat'-prop'en
+            return [...currentCartItems, newBeat];
         });
     };
 
+    //add MERCH to cart
+    function addMerchToCart(product) {
 
-    //Remove BEAT
-    function removeBeatFromCart(beatId){
-        setCartItems(cartItems.filter(
-            (currentbeat => currentbeat.id !== beatId
-            ))
+        setCartItems((currentCartItems) => {
+
+            const merchAlreadyInCart = currentCartItems.some(
+                (item) => item.productType === "merch" && item.productId === product.id
+            );
+
+            if (merchAlreadyInCart) {
+                return currentCartItems;
+            }
+
+            const newMerch = {
+                productType: "merch",
+                productId: product.id,
+                quantity: 1,
+                name: product.name,
+                price: Number(product.price),
+                image: product.image_url
+            };
+
+            return [...currentCartItems, newMerch];
+        });
+    }
+
+
+    //Add ALBUM to cart
+    function addAlbumToCart(album) {
+
+        setCartItems((currentCartItems) => {
+
+            const newBeats = album.beats
+                .filter(
+                    (beat) => !currentCartItems.some(
+                        (item) => item.productType === "beat" && item.productId === beat.id
+                    )
+                )
+                .map((beat) => ({
+                    productType: "beat",
+                    productId: beat.id,
+                    quantity: 1,
+                    name: beat.beatName,
+                    price: Number(beat.beatPrice),
+                    image: beat.albumCover ?? album.albumCover,
+                    albumId: beat.albumId ?? album.id,
+                    albumName: beat.albumName ?? album.albumName
+                }));
+
+            return [...currentCartItems, ...newBeats];
+        });
+    }
+
+
+    
+    function removeFromCart(productType, productId) {
+
+        setCartItems((currentCartItems) =>
+            currentCartItems.filter(
+                (item) => !(item.productType === productType && item.productId === productId)
+            )
         );
-    };
+    }
 
 
     //Clear cart
@@ -63,19 +115,20 @@ function CartProvider ({children}) {
 
     //Total
     const totalPrice = cartItems.reduce(
-        (total, currentBeat) => total + currentBeat.beatPrice, 0
+        (total, item) => total + item.price * item.quantity,0
     );
 
     
     //"Verktygslåda" vi skickar med
     const value = {
-        cartItems,
-        addBeatToCart,
-        addAlbumToCart,
-        removeBeatFromCart,
-        clearCart,
-        totalPrice,
-    };
+    cartItems,
+    addBeatToCart,
+    addAlbumToCart,
+    addMerchToCart,
+    removeFromCart,
+    clearCart,
+    totalPrice
+};
 
     return(
         <CartContext.Provider value={value}>

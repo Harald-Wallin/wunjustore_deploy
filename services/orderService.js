@@ -266,7 +266,7 @@ async function getOrderById(orderId) {
         ON albums.id = beats.album_id
 
         LEFT JOIN supplier_products 
-        ON supplier_products.id = order_items.supplier_products_id
+        ON supplier_products.id = order_items.supplier_product_id
 
         WHERE order_items.order_id = $1
 

@@ -300,3 +300,5 @@ Efter lite tänkande valde jag att låta importen fortsätta skriva över lagers
 
 ## Refaktoreringar
 - orderService.CreateOrder: createOrder() går nu från att ha skapat en order och sedan skicka kunden till orderbekräftelse till att endast skapa en order med cartItems, och status 'pending'
+- CheckOutPage.jsx: gick från att hantera den gamla checkout'en till Stripes embedded' checkout
+- CartContext: implementerat gemensam produktstruktur och hantering för både beats och "merch"

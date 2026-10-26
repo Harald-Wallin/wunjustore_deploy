@@ -1,4 +1,8 @@
+import {useCart} from "../context/CartContext";
+ 
 function ProductCard({ product }) {
+
+    const {addMerchToCart} = useCart;
 
     return (
         <article className="product-card">
@@ -19,7 +23,11 @@ function ProductCard({ product }) {
 
                 <p>{Number(product.price).toFixed(2)} kr</p>
 
-                <p>{product.stock > 0 ? "In stock" : "Out of stock ):"}</p>
+                <p>{product.stock > 0 ? "In stock (:" : "Out of stock ):"}</p>
+
+                <button type="button" onClick={() => addMerchToCart(product)} disabled={product.stock <= 0}>
+                    Add to cart
+                </button>
 
             </div>
 
