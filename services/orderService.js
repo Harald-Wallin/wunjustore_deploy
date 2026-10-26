@@ -170,7 +170,7 @@ async function createOrder(userId, cartItems) {
                 unit_price
                 )
                 VALUES ($1, $2, $3, $4);
-            ` [order.id, product.id, item.quantity, product.price]);
+            ` ,[order.id, product.id, item.quantity, product.price]);
         }
 
         //Justera lagersaldo för fysiska merch-produkterna
@@ -324,8 +324,8 @@ async function getOrdersByUserId(userId) {
         SELECT
             orders.id,
             orders.order_total::float AS "orderTotal",
-            orders.created_at AS "createdAt"
-            orders.status,
+            orders.created_at AS "createdAt",
+            orders.status
 
         FROM orders
         WHERE orders.user_id = $1
@@ -366,7 +366,7 @@ async function cancelOrder(orderId, sessionId = null){
 
             for (const item of itemsResult.rows){
                 await client.query(`
-                    UPDATE supplier_product
+                    UPDATE supplier_products
                     SET stock = stock + $1
                     WHERE id = $2;`,
                 [item.quantity, item.supplier_product_id]);
