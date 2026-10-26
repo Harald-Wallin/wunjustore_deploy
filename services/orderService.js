@@ -5,7 +5,7 @@ import {z} from "zod";
 const cartItemSchema = z.object({
     productType: z.enum(["beat", "merch"]),
     productId: z.number().int().positive(),
-    quantity: z.number().int().positivte()
+    quantity: z.number().int().positive()
 
     //refine= mer komplex regel än vanlig zod-validering. true om validering lyckatdes, annars false
     // parameter 1, parameter 2. P1 = funktion med objekt som ska valideras, ska returnera true/false
