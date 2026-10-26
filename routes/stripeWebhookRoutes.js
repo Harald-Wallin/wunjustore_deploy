@@ -29,7 +29,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
         if (event.type === "checkout.session.completed"){
             const session = event.data.object;
 
-            if(session.payment_intent_status === "paid"){
+            if(session.payment_status === "paid"){
                 const orderId = Number(session.client_reference_id);
                 await markOrderAsPaid(orderId, session.id);
             }
