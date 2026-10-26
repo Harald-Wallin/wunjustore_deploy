@@ -6,7 +6,7 @@ async function createCheckoutSession(order){
     
     const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        ui_mode:"embedded",
+        ui_mode:"embedded_page",
         line_items: [
             {
                 price_data:{

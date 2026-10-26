@@ -2,7 +2,7 @@ import {useCart} from "../context/CartContext";
  
 function ProductCard({ product }) {
 
-    const {addMerchToCart} = useCart;
+    const {addMerchToCart} = useCart();
 
     return (
         <article className="product-card">
