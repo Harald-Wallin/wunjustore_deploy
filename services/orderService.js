@@ -342,13 +342,15 @@ async function cancelOrder(orderId, sessionId = null){
     try{
         await client.query("BEGIN");
 
-            //kollar så att orderId och stripe session ID matchar (och att ordern är "pending" innan avbrott)
+            //kollar så att orderId och stripe session ID matchar, tt ordern är "pending",
+            //samt att inget (stripe)session id finns ELLER om en specifik session ska cancellas
             const orderResult = await client.query(`
                 UPDATE orders
                 SET status = 'cancelled'
                 WHERE id = $1
                 AND status = 'pending'
-                AND stripe_session_id = $2
+                AND ((stripe_session_id IS NULL AND $2::text IS NULL)
+                OR stripe_session_id = $2)
                 RETURNING id;`,
             [orderId, sessionId]);
 
