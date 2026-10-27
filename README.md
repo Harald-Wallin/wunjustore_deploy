@@ -1,14 +1,11 @@
 # Wunju Store
 
 ## About
-Ett OTROLIGT grovhugget utkast av en eventuell egen sida
-där jag säljer min egna musik under alias Wunju.
+Wunju Store är ett första utkast till en e-handel där jag på sikt vill sälja min egen musik under alias 'Wunju', samt eventuell framtida merchandise.
 
-URSÄKTA en mycket ÖGONSTICKANDE besökarupplevelse på sidan,
-det har varit snålt om tid och focus har legat på att få klart
-funktionalitet!
+Projektet har utvecklats inom ramen för utbildningen Fullstack Developer och tre laborationer med fokus på externa API, dataintegration, sökfunktionalitet och betalningar.
 
-(PS. All css är i det stora hela AI-genererad)
+Fokus har legat på backend, databaslogik och fungerande integrationer snarare än visuell design. Gränssnittet är därför fortfarande relativt enkelt och stora delar av CSS-koden har genererats med hjälp av AI.
 
 ## Live site
 Frontend: https://client-ten-topaz-75.vercel.app
@@ -28,12 +25,15 @@ Vercel
 ## Features
 - Browse albums and beats
 - Audio previews
-- Cart
-- Checkout / create orders
+- "Merch" products
+- Algolia search
 - Customer order history
 - Admin album/beat CRUD
 - Admin order overview
 - Fake customer/admin login
+- Stripe embedded Checkout (test), webhook, order status and stock reservations
+- Supplier product import 
+- Admin product CRUD
 
 ## Test login
 Customer:
@@ -76,7 +76,6 @@ endast för display av album-lösa beats.
 - Riktig authentication. Bättre login med passwordHash osv.
 - Cart lagras i databas istället för react state endast
 - Bättre backend authorization
-- Order status
 - MYCKET mer polerad validation/UI
 - Implementera spotify i själva sidan, så att anvädnaren
 faktiskt lyssnar på wunjus spotify när de är inne på 
@@ -88,7 +87,7 @@ Cart, alternativt lägga till så att ADMIN
 KAN komma åt Cart > Checkout > place order.
 
 ## Documentation
-Igen, pana gärna in /Docs/ i rootmappen-
+Igen, spana gärna in /Docs/ i rootmappen-
 där hittar du de första dokumenten från planeringsstadiet:
 - components.md
 - project-overview.md
@@ -281,9 +280,9 @@ Jag vill även automatisera leverantörsimporten, exempelvis genom att köra den
 
 ## Flöde
 1. Kund lägger produkter i varukorg- ingen reservation läggs på produkterna.
-2. Kund går vidare till 'checkoutPage' - HÄR reserveras produkterna i 30min.
-3. En order med status 'pending' skaps > Stripe checkout session.
-4. Kunden har 30min på sig att betala - ser detta som en mätare + varning då ca 5min återstår.
+2. Kund går vidare till 'checkoutPage' och ser en sammanfattning av sin kundkorg.
+3. När kund klickar sig vidare till Payment sker lagerreservation på varorna, en stripe session startas och en order med status 'pending' skapas. 
+4. Kunden har 30min på sig att betala innan sessionen löper ut och order cancellas.
 5A. Stripe skickar webhook, backend markerar order som 'paid' > genomfört köp
 5B. Checkoutsession löper ut, backend hanterar ordern som 'cancelled' och återställer lagersaldo.
 
@@ -292,6 +291,8 @@ Jag vill även automatisera leverantörsimporten, exempelvis genom att köra den
 2. Kund klickar på checkout - backend kollar + minskar saldot
 3A. Kund betalar - order = paid, lagersaldo förblir minskat
 3B. Kund avbryter/checkout timeout - order = cancelled, lagersaldo återställs
+
+Jag tänkte först simulera en fysisk butik där föremål reserveras så fort kunden lägger produkten i varukorgen, men detta innebär att mycket mer intrikat reservationshantering hade krävt, t.ex om man vill förhindra att en kund inte reserverar massor av produkter och ändå låta denne "titta runt" och handla utan tidspress att varukorgen ska nollställas.
 
 ## Leverantörsimport & saldo
 
@@ -302,3 +303,9 @@ Efter lite tänkande valde jag att låta importen fortsätta skriva över lagers
 - orderService.CreateOrder: createOrder() går nu från att ha skapat en order och sedan skicka kunden till orderbekräftelse till att endast skapa en order med cartItems, och status 'pending'
 - CheckOutPage.jsx: gick från att hantera den gamla checkout'en till Stripes embedded' checkout
 - CartContext: implementerat gemensam produktstruktur och hantering för både beats och "merch"
+
+## Vad som inte är bygg än
+- Dubblett-köp av beats. En användare ska inte kunna köpa ett beat som den redan äger (finns inget vits med det), men det finns ännu inget stöd för detta än.
+- Decrease/increase knappar på merch i cart, om man t.ex vill lägga till eller ta bort antal från en produkt som redan ligger i kundkorgen.
+- Förenklad checkout. Kunden ska inte behöva gå in i Cart för att komma till checkout- ska lägga till en lättåtkommlig checkout-knapp.
+- Omfattande valuta-omvandling. Just nu fungerar endast valuta-omvandligen i beats. Detta ska såklart implementeras överallt på sidan (merch, checkout, stripe)
