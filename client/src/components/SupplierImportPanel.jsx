@@ -271,7 +271,7 @@ function SupplierImportPanel({ onImportComplete }) {
 
         try {
 
-            response = await fetch(`${API_URL}/api/admin/products/${encodeURIComponent(sku)}/image`,{
+            const response = await fetch(`${API_URL}/api/admin/products/${encodeURIComponent(sku)}/image`,{
                 method: "DELETE"
             });
 

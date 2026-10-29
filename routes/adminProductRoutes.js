@@ -50,9 +50,24 @@ const updateProductSchema = z.object({
 
 
 //POST /api/admin/products/:sku/image
-router.post("/:sku/image", upload.single("image"), async (req, res, next) =>{
+router.post("/:sku/image", upload.single("image"), async (error, req, res, next) =>{
+    //Multer middleware!
     //upload.single("image") = multer middleware! Endpoint förväntar sig en fil i ett form som heter "image"
       
+    if (error){
+        if(error.code === "LIMIT_FILE_SIZE"){
+            return res.status(400).json({
+                error: "Image is bigger than 4MB"
+            })
+        }
+
+        return res.status(400).json({
+            error: error.message
+        })
+    }
+    next();
+    
+}, async (req, res, next) => {
     //om ingen fil finns i uppladdningen
     if (!req.file){
 
@@ -104,18 +119,34 @@ router.post("/:sku/image", upload.single("image"), async (req, res, next) =>{
             throw error;
         }
 
+        //tar bort gamla bilden efter lyckad uppdatering
         if (product.image_path){
             try{
-                await removeProductImage(product.image_path);
 
+                await removeProductImage(product.image_path);
             }catch(error){
-                console.error("Old image deletion failed:", error);
+
+                console.error("Old image failed to be deleted:", error);
             }
         }
 
+        //syncar Algolia efter bilduppdatering
+        let searchSync = {sucess: false};
+
+        try{
+
+            await indexProducts([updatedProduct]);
+
+            searchSync = {sucess: true, status: "submitted"};
+
+        }catch(error){
+
+            console.error("Algolia sync failed after image upload:", error);
+        }
+
         return res.json({
-            message: "Image received successfully",
-            product: updatedProduct
+            message: "Image recieved sucessfully",
+            product: updatedProduct, searchSync
         });
 
     }catch(error){
@@ -125,7 +156,8 @@ router.post("/:sku/image", upload.single("image"), async (req, res, next) =>{
 
 });
 
-//delete product image
+
+//delete /api/admin/products/:sku/image
 router.delete("/:sku/image", async (req, res, next) => {
     try {
 
@@ -134,23 +166,48 @@ router.delete("/:sku/image", async (req, res, next) => {
 
         if (!product) {
             return res.status(404).json({
-                error: "Product not found"
+                error: "Product not found!"
             });
         }
 
         if (!product.image_path) {
             return res.status(404).json({
-                error: "Product has no image to delete"
+                error: "Product has no image!"
             });
         }
 
-        await removeProductImage(product.image_path);
-
+        //rensar bildreferensen i databas
         const updatedProduct = await clearProductImage(sku);
+
+        if (!updatedProduct) {
+            throw new Error("Could not update product image");
+        }
+
+        //Tar bort bildfilen från Supabase
+        try {
+            await removeProductImage(product.image_path);
+        } catch (error) {
+            console.error("Image deletion from Supabase failed:", error);
+        }
+
+        //Synkronisera bildraderingen till Algolia
+        let searchSync = { success: false };
+
+        try {
+
+            await indexProducts([updatedProduct]);
+
+            searchSync = {success: true, status: "submitted"};
+
+        } catch (error){
+
+            console.error("Algolia sync failed after image deletion:", error);
+        }
 
         return res.json({
             message: "Product image deleted successfully!",
-            product: updatedProduct
+            product: updatedProduct,
+            searchSync
         });
 
     } catch (error) {
