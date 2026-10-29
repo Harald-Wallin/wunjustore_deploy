@@ -309,3 +309,49 @@ Efter lite tänkande valde jag att låta importen fortsätta skriva över lagers
 - Decrease/increase knappar på merch i cart, om man t.ex vill lägga till eller ta bort antal från en produkt som redan ligger i kundkorgen.
 - Förenklad checkout. Kunden ska inte behöva gå in i Cart för att komma till checkout- ska lägga till en lättåtkommlig checkout-knapp.
 - Omfattande valuta-omvandling. Just nu fungerar endast valuta-omvandligen i beats. Detta ska såklart implementeras överallt på sidan (merch, checkout, stripe)
+
+
+
+# Labb 4 – molnlagring av bilder
+
+## Flöde
+
+1. Admin väljer en produkt via SKU och laddar upp en JPEG/PNG-bild från Merchandise-sidan.
+2. Frontend/react skickar filen som `FormData` till Express.
+3. Backend validerar filen och laddar upp den till supabase bucket.
+4. Bildens URL och sökväg sparas i databasen.
+5. Algolia synkroniseras så att bilden även visas i sökresultaten.
+
+ > React kommunicerar aldrig direkt med supabase, databasen förblir single source of truth!!
+
+## Supabase Storage och databas
+
+-'storageAdapter.js' sköter kommunikationen med supabase bucket'en 'product-images' och anges filnamn med UUID.
+- Jag lade även till kolumnen 'image_path' i 'supplier_products' via migrationen '004_add_supplier_product_image_path.sql'.
+- 'image_url' används för att visa bilden i frontend, och 'image_path' används för att hitta och radera filen i bucketen.
+
+## API och validering
+
+Jag utökade 'adminProductRoutes.js' med två endpoints:
+
+- 'post /api/admin/products/:sku/image' : där bild laddas upp eller ersätter gammal
+- 'delete /api/admin/products/:sku/image' : tar bort produktbild
+
+Endast JPEG och PNG tillåts, med en maxstorlek på 4 MB precis som i genomgången.
+
+## Bildersättning
+
+-Bildersättning följer samma flöde som i genomgången: uppladdning > sparning > radera gammal fil.
+- Efter uppladdning eller borttagning uppdateras även Algolia med produktens aktuella image_url.
+
+## React / användargränssnitt
+
+- Jag missade först att inkludera 'image_url' i algolias produktmodell, vilket gjorde att bilderna fungerade i den vanliga produktlistan men inte vid sökning. Detta korrigerades i 'searchAdapter.js'.
+
+Jag utökade 'SupplierImportPanel.jsx' med bilduppladdning, ersättning, borttagning, felmeddelanden och förhandsvisning.
+
+## Fortfarande kvar att göra
+
+- Verifiering av felhantering vid avbrott i Supabase.
+- Deployment och testning i produktionsmiljön.
+- Ersätta det tillfälliga 'localOnly''-skyddet med riktig adminbehörighet innan uppladdning tillåts till produktion.
