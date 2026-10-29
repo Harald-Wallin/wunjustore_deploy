@@ -21,6 +21,22 @@ export async function getAllProducts(){
 }
 
 
+
+//Hämta en specifik produkt via SKU
+export async function getProductBySku(sku) {
+
+    const result = await pool.query(
+        `SELECT *
+        FROM supplier_products
+        WHERE sku = $1;`,
+        [sku]
+    );
+
+    return result.rows[0] ?? null;
+}
+
+
+
 //Skapa en ny produkt manuellt
 export async function createProduct(product) {
 
@@ -84,6 +100,38 @@ export async function deleteProduct(sku) {
         WHERE sku = $1
         RETURNING *;`,
         [sku]
+    );
+
+    return result.rows[0] ?? null;
+}
+
+
+//Uppdaterar produktens image_url och image_path via SKU
+export async function updateProductImage(sku, imageUrl, imagePath) {
+
+    const result = await pool.query(
+        `UPDATE supplier_products
+        SET
+        image_url = $1,
+        image_path = $2
+        WHERE sku = $3
+        RETURNING *;`,
+        [imageUrl, imagePath, sku]
+    );
+
+    return result.rows[0] ?? null;
+}
+
+//rensar produkts image
+export async function clearProductImage(sku){
+
+    const result = await pool.query(
+        `UPDATE supplier_products
+        SET image_url = NULL,
+        image_path = NULL
+        WHERE sku = $1
+        RETURNING *;`
+        ,[sku]
     );
 
     return result.rows[0] ?? null;

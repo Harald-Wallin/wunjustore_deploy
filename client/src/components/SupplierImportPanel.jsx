@@ -13,6 +13,13 @@ function SupplierImportPanel({ onImportComplete }) {
     const [syncResult, setSyncResult] = useState(null);
     const [syncError, setSyncError] = useState(null);
 
+    //produkt-images från supabase
+    const [imageFile, setImageFile] = useState(null);
+    const [imageLoading, setImageLoading] = useState(false);
+    const [imageResult, setImageResult] = useState(null);
+    const [imageError, setImageError] = useState(null);
+    const [currentImageUrl, setCurrentImageUrl] = useState(null);
+
 
     //Manuell, tillfällig produkthantering
     const [productForm, setProductForm] = useState({
@@ -139,8 +146,8 @@ async function handleProductAction(action) {
 
         let body;
 
-        if (isCreate) {
-            body = {
+        if (isCreate){
+            body={
                 sku,
                 ean: productForm.ean.trim(),
                 name: productForm.name.trim(),
@@ -190,7 +197,56 @@ async function handleProductAction(action) {
     }
 }
 
+//Ladda upp/ersätt produktbild
+async function handleImageUpload() {
 
+    if (!imageFile) {
+        setImageError("Please select an image first.");
+        return;
+    }
+
+    setImageLoading(true);
+    setImageError(null);
+    setImageResult(null);
+
+    const sku = productForm.sku.trim();
+
+    try{
+
+        const formData = new FormData();
+        formData.append("image", imageFile);
+
+        const response = await fetch(
+            `${API_URL}/api/admin/products/${encodeURIComponent(sku)}/image`,
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok){
+            throw new Error(
+                data.message || data.error || "Image upload failed."
+            );
+        }
+
+        setImageResult("Image uploaded successfully!");
+        setCurrentImageUrl(data.product.image_url);
+        setImageFile(null);
+
+        //Uppdatera produktlistan i MerchPage
+        await onImportComplete();
+
+    } catch (error){
+        console.error("Image upload failed:", error);
+        setImageError(error.message);
+
+    } finally{
+        setImageLoading(false);
+    }
+}
 
 
     return (
