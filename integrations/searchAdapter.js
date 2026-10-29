@@ -30,7 +30,8 @@ function mapProductsToRecords(products) {
         name: product.name,
         category: product.category,
         price: Number(product.price),
-        stock: product.stock
+        stock: product.stock,
+        image_url: product.image_url
     }));
 }
 
@@ -91,7 +92,8 @@ export async function searchProducts(query, page = 1, pageSize = 9){
         name: hit.name,
         category: hit.category,
         price: hit.price,
-        stock: hit.stock
+        stock: hit.stock,
+        image_url: hit.image_url ?? null
     }));
 
     //EXEMPEL på algola-response:
