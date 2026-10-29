@@ -113,140 +113,191 @@ function SupplierImportPanel({ onImportComplete }) {
     }
 
 
-//Uppdatera formulärfält
-function handleProductChange(event) {
+    //Uppdatera formulärfält
+    function handleProductChange(event) {
 
-    const { name, value } = event.target;
+        const { name, value } = event.target;
 
-    setProductForm((previous) => ({
-        ...previous,
-        [name]: value
-    }));
-}
+        setProductForm((previous) => ({
+            ...previous,
+            [name]: value
+        }));
 
 
-//Skapa/uppdatera/ radera produkt (tillfällig, AI)
-async function handleProductAction(action) {
-
-    setProductLoading(true);
-    setProductError(null);
-    setProductResult(null);
-
-    const sku = productForm.sku.trim();
-
-    try {
-        const isCreate = action === "create";
-        const isUpdate = action === "update";
-
-        const url = isCreate
-            ? `${API_URL}/api/admin/products`
-            : `${API_URL}/api/admin/products/${encodeURIComponent(sku)}`;
-
-        const method = isCreate ? "POST" : isUpdate ? "PATCH" : "DELETE";
-
-        let body;
-
-        if (isCreate){
-            body={
-                sku,
-                ean: productForm.ean.trim(),
-                name: productForm.name.trim(),
-                category: productForm.category.trim(),
-                price: Number(productForm.price),
-                stock: Number(productForm.stock)
-            };
+        //rensar förhandsvisning (product image) vid byte av SKU!
+        if (name === "sku"){
+            setCurrentImageUrl(null);
+            setImageResult(null);
+            setImageError(null);
         }
-
-        if (isUpdate) {
-            body = {
-                name: productForm.name.trim(),
-                price: Number(productForm.price)
-            };
-        }
-
-        const response = await fetch(url, {
-            method,
-            headers: {
-                "Content-Type": "application/json"
-            },
-            ...body && { body: JSON.stringify(body) }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(
-                data.message || data.error || "Product operation failed"
-            );
-        }
-
-        setProductResult({
-            action,
-            data
-        });
-
-        //Hämta produktlistan från PostgreSQL igen
-        await onImportComplete();
-
-    } catch (error) {
-        console.error("Product operation failed:", error);
-        setProductError(error.message);
-
-    } finally {
-        setProductLoading(false);
-    }
-}
-
-//Ladda upp/ersätt produktbild
-async function handleImageUpload() {
-
-    if (!imageFile) {
-        setImageError("Please select an image first.");
-        return;
     }
 
-    setImageLoading(true);
-    setImageError(null);
-    setImageResult(null);
 
-    const sku = productForm.sku.trim();
+    //Skapa/uppdatera/radera produkt (tillfällig, AI)
+    async function handleProductAction(action) {
 
-    try{
+        setProductLoading(true);
+        setProductError(null);
+        setProductResult(null);
 
-        const formData = new FormData();
-        formData.append("image", imageFile);
+        const sku = productForm.sku.trim();
 
-        const response = await fetch(
-            `${API_URL}/api/admin/products/${encodeURIComponent(sku)}/image`,
-            {
+        try {
+            const isCreate = action === "create";
+            const isUpdate = action === "update";
+
+            const url = isCreate
+                ? `${API_URL}/api/admin/products`
+                : `${API_URL}/api/admin/products/${encodeURIComponent(sku)}`;
+
+            const method = isCreate ? "POST" : isUpdate ? "PATCH" : "DELETE";
+
+            let body;
+
+            if (isCreate){
+                body={
+                    sku,
+                    ean: productForm.ean.trim(),
+                    name: productForm.name.trim(),
+                    category: productForm.category.trim(),
+                    price: Number(productForm.price),
+                    stock: Number(productForm.stock)
+                };
+
+            }
+
+            if (isUpdate) {
+                body = {
+                    name: productForm.name.trim(),
+                    price: Number(productForm.price)
+                };
+            }
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                ...body && { body: JSON.stringify(body) }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || data.error || "Product operation failed"
+                );
+            }
+
+            setProductResult({
+                action,
+                data
+            });
+
+            //Hämta produktlistan från PostgreSQL igen
+            await onImportComplete();
+
+        } catch (error) {
+            console.error("Product operation failed:", error);
+            setProductError(error.message);
+
+        } finally {
+            setProductLoading(false);
+        }
+    }
+
+    //Ladda upp/ersätt produktbild
+    async function handleImageUpload() {
+
+        if (!imageFile) {
+            setImageError("Select an image first!");
+            return;
+        }
+
+        setImageLoading(true);
+        setImageError(null);
+        setImageResult(null);
+
+        const sku = productForm.sku.trim();
+
+        try{
+
+            //Formdata innehåller datan från formen, duh. Append lägger till ett nyckeltal och ett värde.
+            // i detta fall "image: <image-filen>"
+            const formData = new FormData();
+            formData.append("image", imageFile);
+
+            const response = await fetch(`${API_URL}/api/admin/products/${encodeURIComponent(sku)}/image`,{
                 method: "POST",
                 body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok){
+                throw new Error(data.message || data.error || "Image upload failed");
             }
-        );
 
-        const data = await response.json();
+            setImageResult("Image uploaded successfully!");
+            setCurrentImageUrl(data.product.image_url);
+            setImageFile(null);
 
-        if (!response.ok){
-            throw new Error(
-                data.message || data.error || "Image upload failed."
-            );
+            //Uppdatera produktlistan i MerchPage
+            await onImportComplete();
+
+        } catch (error){
+            console.error("Image upload failed:", error);
+            setImageError(error.message);
+
+        } finally{
+            setImageLoading(false);
+        }
+    }
+
+    
+    //Ta bort produktbild
+    async function handleImageDelete(){
+
+        const sku = productForm.sku.trim();
+
+        if (!sku) {
+            setImageError("Enter a valid SKU");
+            return;
         }
 
-        setImageResult("Image uploaded successfully!");
-        setCurrentImageUrl(data.product.image_url);
-        setImageFile(null);
+        setImageLoading(true);
+        setImageError(null);
+        setImageResult(null);
 
-        //Uppdatera produktlistan i MerchPage
-        await onImportComplete();
+        try {
 
-    } catch (error){
-        console.error("Image upload failed:", error);
-        setImageError(error.message);
+            response = await fetch(`${API_URL}/api/admin/products/${encodeURIComponent(sku)}/image`,{
+                method: "DELETE"
+            });
 
-    } finally{
-        setImageLoading(false);
+            const data = await response.json();
+
+            if (!response.ok){
+                throw new Error(data.error || data.message || "Image deletion failed");
+            }
+
+            setImageResult("Image deleted successfully!");
+            setCurrentImageUrl(null);
+            setImageFile(null);
+
+            await onImportComplete();
+
+        } catch (error) {
+
+            console.error("Image deletion failed:", error);
+            setImageError(error.message);
+
+        } finally {
+
+            setImageLoading(false);
+        }
     }
-}
+
 
 
     return (
@@ -282,11 +333,7 @@ async function handleImageUpload() {
 
             </form>
 
-            {error && (
-                <p className="form-error" role="alert">
-                    {error}
-                </p>
-            )}
+            {error && (<p className="form-error" role="alert">{error}</p>)}
 
             {result && (<div className="supplier-import-result">
 
@@ -337,7 +384,7 @@ async function handleImageUpload() {
             )}
 
 
-                        {/* Manuell produkthantering, tillfällig */}
+            {/* Manuell produkthantering, tillfällig */}
             <div className="supplier-product-management">
 
                 <h2>Product Management</h2>
@@ -440,13 +487,45 @@ async function handleImageUpload() {
 
                     </div>
 
+                    {/*Produktbilder */}
+                    <div className = "supplier-image-management">
+                        <h3>Product Image</h3>
+                        
+                        <label htmlFor = "product-image">Select image (JPEG/NPG, max 4mb) </label>
+
+                        <input id = "product-image" type = "file" accept = "image/jpeg,image/png" 
+                            onChange = {(event) => {
+                                setImageFile(event.target.files?.[0] ?? null);
+                            }} 
+                        />
+
+                        <div className = "supplier-product-actions">
+
+                            <button type ="button" onClick={handleImageUpload} disabled={imageLoading ||!imageFile || !productForm.sku.trim()}>
+                                {imageLoading ? "Processing.." : "Upload/Replace Image"}
+                            </button>
+
+                            <button type ="button" onClick = {handleImageDelete} disabled={imageLoading ||!productForm.sku.trim()}>
+                                Delete Image
+                            </button>
+
+                            {imageError && (<p className = "form-error" role="alert">{imageError}</p>)}
+                            {imageResult && (<p className="supplier-image-result">{imageResult}</p>)}
+
+                            {currentImageUrl && (
+                                <div className = "supplier-image-preview">
+
+                                    <p>Uploaded image:</p>
+                                    <img src ={currentImageUrl} alt= {`Product ${productForm.sku}`} style = {{maxWidth: "180px", heigt: "auto"}} />
+
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                 </form>
 
-                {productError && (
-                    <p className="form-error" role="alert">
-                        {productError}
-                    </p>
-                )}
+                {productError && (<p className="form-error" role="alert">{productError}</p>)}
 
                 {productResult && (
                     <div className="supplier-import-result">
@@ -455,8 +534,8 @@ async function handleImageUpload() {
                             {productResult.action === "create"
                                 ? "Product created!"
                                 : productResult.action === "update"
-                                    ? "Product updated!"
-                                    : "Product deleted!"}
+                                ? "Product updated!"
+                            : "Product deleted!"}
                         </h3>
 
                         <p>SKU: {productResult.data.product.sku}</p>

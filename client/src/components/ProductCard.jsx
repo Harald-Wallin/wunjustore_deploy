@@ -4,6 +4,8 @@ function ProductCard({ product }) {
 
     const {addMerchToCart} = useCart();
 
+    console.log("ProductCard:", product.sku, product.image_url);
+
     return (
         <article className="product-card">
 
