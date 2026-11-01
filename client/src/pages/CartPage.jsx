@@ -38,9 +38,9 @@ function CartPage(){
                     /*Intern extra-return för att vi kör kod innuti map()*/
                     <article key={`${item.productType}-${item.productId}`} className="cart-item">
                         
-                        {item.producType === "beat" ? (
-                            <Link to={`/albums/${currentBeat.albumId}`} className="album-card_cover-link">
-                                <img className="cart-item_image" src={currentBeat.albumCover} alt="Album Cover" />
+                        {item.productType === "beat" ? (
+                            <Link to={`/albums/${item.albumId}`} className="album-card_cover-link">
+                                <img className="cart-item_image" src={item.image} alt="Album Cover" />
                             </Link>
 
                         ):(
@@ -48,7 +48,6 @@ function CartPage(){
                         )}
 
                         <h2>{item.name}</h2>
-                        {/*<p>{currentBeat.albumName}</p>*/}
                         <p className="cart-item_price">Price: {convertPrice(item.price).toFixed(2)} {currency}</p>
 
                         {item.productType === "merch" && (

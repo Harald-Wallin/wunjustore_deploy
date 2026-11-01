@@ -53,7 +53,7 @@ async function createCheckoutSession(order){
         client_reference_id: String(order.id),
 
         //Dit kunden skickas efter checkout. Stripe ersätter  {CHECKOUT_SESSION_ID}
-        return_url:`${process.env.FRONTEND_URL}/orders/${order.id}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+        return_url:`${process.env.CLIENT_URL}/orders/${order.id}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
         redirect_on_completion: "always",
         expires_at: Math.floor(Date.now() / 1000) + 30 * 60 //30 minuter
 

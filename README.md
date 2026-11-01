@@ -518,4 +518,48 @@ serviceName: "PostNord Service Point"
 - i shippingService, GEnerera startTime i svensk lokal tid. Använd nästa vardag kl 08.00 som förenklad överlämningstid, med formatet YYYY-MM-DDTHH. 
 Hantera också lördag och söndag genom att välja måndag.
 
-- om POSTNORD_ORIGIN_POSTAL_CODE saknas/ogiltig, kasta ett fel. Låt inte det jkass
+- om POSTNORD_ORIGIN_POSTAL_CODE saknas/ogiltig, kasta ett fel. Låt inte det räknas som INVALID_POSTAL_CODE från användare/kund."
+-----
+
+**Prompt 11** - (integration i frontend):
+"Nu ska vi göra minsta möjliga ändringar i fronted, react. 
+
+Läs först igenom CheckoutPage.jsx,  CartPage.jsx, CartContext, CurrencyCOntexxt, config/api, och relevanta CSS-filer.
+
+-GET /api/shipping/service-points?postalCode=63354 kommer returnera en array med objekt uppbyggda av id, name, och address. 
+- GET /api/shipping/delivery-estimate?method=service_point&postalCode=63354 kommer returnera t.ex:
+{
+"estimatedDeliveryDate": "2026-11-03",
+"estimatedDeliveryTime": "2026-11-03T18:00",
+"serviceName": "PostNord Service Point"
+} 
+
+Prognosen KAN även vara null. 
+
+- Post /api/checkout ska ta t.ex:
+{
+"userId": 1,
+"cartItems": [...],
+"shippingSelection": {
+"method": "service_point",
+"postalCode": "63354",
+"servicePointId": "..."
+}
+}
+
+och om method = home_delivery så ska servicePointId vara null, och för en cart med bara beats behövs ingen shippingSelection.
+
+- i checkoutPage.jsx, implementera funktionalitet som avgör om cartItems innehåller minst en produkt med productType === "merch", om cart endast har beats = visa ingen fraktsektion och behåll befintligt checkout-flow. OM den innehåller merch, visa postnummerfält och acceptera svenska postnummer, visa de två leveransmetoderna och deras priser, visa även gratis frakt om produkternas värde >= 500kr.  Visa också alla priser i den existerande valutakontexten med convertPrice och currency.
+
+- När giltigt postnummer + leveransmetod finns, hämta leveransprognosen, visa uppskattat leveransdatom, visa loading och eventuella felmeddelanden.
+När service_point väljs, hämta ombudet via GET, visa ombudens namn och adresser (en enkel select räcker). Kunden MÅSTE välja ett ombud innan betalning!
+Och om kunden väljer home_delivery, kräv ingen ombudsID och visa inte listan med ombud. 
+
+-Uppdatera handlePlaceOrder så shippingSelection skickas med userId och cartItems, med exakt de fältnamn som backend förväntar sig. 
+Blockera gärna också betalningsknappen om ogiltiga värden/alternativ angetts.
+
+- Visa en enkel sammanfattning före betalning, med produkter, frakt, total inkl. frakt, och beräknad leverans!
+"
+#### Korrigeringar:
+- Copilot använde sig av 'FRONTEND_URL' vilket gav fel vid checkout > payment. 
+Ändrade manuellt till den lokala 'CLIENT_URL' istället.

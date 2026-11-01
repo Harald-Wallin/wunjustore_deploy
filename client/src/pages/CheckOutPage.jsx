@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import API_URL from "../config/api";
 
@@ -25,8 +25,166 @@ function CheckoutPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [clientSecret, setClientSecret] = useState(null);
+    const [postalCode, setPostalCode] = useState("");
+    const [shippingMethod, setShippingMethod] = useState("service_point");
+    const [servicePoints, setServicePoints] = useState([]);
+    const [servicePointsKey, setServicePointsKey] = useState("");
+    const [servicePointId, setServicePointId] = useState("");
+    const [servicePointSelectionKey, setServicePointSelectionKey] = useState("");
+    const [shippingLoading, setShippingLoading] = useState(false);
+    const [shippingError, setShippingError] = useState(null);
+    const [estimate, setEstimate] = useState(null);
+    const [estimateKey, setEstimateKey] = useState("");
+    const [estimateLoading, setEstimateLoading] = useState(false);
+    const [estimateError, setEstimateError] = useState(null);
+
+    const hasMerch = useMemo(
+        () => cartItems.some((item) => item.productType === "merch"),
+        [cartItems]
+    );
+    const normalizedPostalCode = postalCode.trim().replace(/\s/g, "");
+    const validPostalCode = /^\d{5}$/.test(normalizedPostalCode);
+    const shippingSelectionKey = `${normalizedPostalCode}:${shippingMethod}`;
+    const selectedServicePointId = servicePointSelectionKey === shippingSelectionKey
+        ? servicePointId
+        : "";
+    const visibleServicePoints = servicePointsKey === shippingSelectionKey
+        ? servicePoints
+        : [];
+    const visibleEstimate = estimateKey === shippingSelectionKey ? estimate : null;
+    const showShippingLoading = shippingMethod === "service_point" && shippingLoading;
+    const showShippingError = shippingMethod === "service_point" ? shippingError : null;
+    const shippingPrice = hasMerch && totalPrice < 500
+        ? shippingMethod === "service_point" ? 59 : 99
+        : 0;
+    const shippingSelectionIsValid = !hasMerch
+    || (
+        validPostalCode
+        && (
+            shippingMethod === "home_delivery"
+            || (
+                !shippingLoading
+                && servicePointsKey === shippingSelectionKey
+                && visibleServicePoints.some(
+                    (point) => point.id === selectedServicePointId
+                )
+            )
+        )
+    );
+
+    useEffect(() => {
+        if (!hasMerch || !validPostalCode || clientSecret) {
+            return undefined;
+        }
+
+        const controller = new AbortController();
+        let active = true;
+
+        async function fetchShippingData() {
+            setShippingLoading(true);
+            setShippingError(null);
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/api/shipping/service-points?postalCode=${normalizedPostalCode}`,
+                    {signal: controller.signal}
+                );
+
+                if (!response.ok) {
+                    throw new Error("Could not load service points");
+                }
+
+                const data = await response.json();
+                if (active) {
+                    setServicePoints(Array.isArray(data) ? data : []);
+                    setServicePointsKey(shippingSelectionKey);
+                }
+            } catch (fetchError) {
+                if (fetchError.name !== "AbortError" && active) {
+                    setServicePoints([]);
+                    setShippingError(fetchError.message);
+                }
+            } finally {
+                if (active) {
+                    setShippingLoading(false);
+                }
+            }
+        }
+
+        if (shippingMethod === "service_point") {
+            fetchShippingData();
+        }
+
+        return () => {
+            active = false;
+            controller.abort();
+        };
+    }, [clientSecret, hasMerch, normalizedPostalCode, shippingMethod, shippingSelectionKey, validPostalCode]);
+
+    useEffect(() => {
+        if (!hasMerch || !validPostalCode || clientSecret) {
+            return undefined;
+        }
+
+        const controller = new AbortController();
+        let active = true;
+
+        async function fetchEstimate() {
+            setEstimateLoading(true);
+            setEstimateError(null);
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/api/shipping/delivery-estimate?method=${shippingMethod}&postalCode=${normalizedPostalCode}`,
+                    {signal: controller.signal}
+                );
+
+                if (!response.ok) {
+                    throw new Error("Could not load delivery estimate");
+                }
+
+                const data = await response.json();
+                if (active) {
+                    setEstimate(data);
+                    setEstimateKey(shippingSelectionKey);
+                }
+            } catch (fetchError) {
+                if (fetchError.name !== "AbortError" && active) {
+                    setEstimate(null);
+                    setEstimateError(fetchError.message);
+                }
+            } finally {
+                if (active) {
+                    setEstimateLoading(false);
+                }
+            }
+        }
+
+        fetchEstimate();
+
+        return () => {
+            active = false;
+            controller.abort();
+        };
+    }, [clientSecret, hasMerch, normalizedPostalCode, shippingMethod, shippingSelectionKey, validPostalCode]);
+
+    function handlePostalCodeChange(event) {
+        setPostalCode(event.target.value);
+        setServicePointId("");
+        setServicePointSelectionKey("");
+    }
+
+    function handleShippingMethodChange(method) {
+        setShippingMethod(method);
+        setServicePointId("");
+        setServicePointSelectionKey("");
+    }
 
     async function handlePlaceOrder() {
+        if (!shippingSelectionIsValid || clientSecret) {
+            return;
+        }
+
         try {
             setIsSubmitting(true);
             setError(null);
@@ -46,7 +204,16 @@ function CheckoutPage() {
                 },
                 body: JSON.stringify({
                     userId: currentUser.id,
-                    cartItems: checkoutItems
+                    cartItems: checkoutItems,
+                    ...(hasMerch && {
+                        shippingSelection: {
+                            method: shippingMethod,
+                            postalCode: normalizedPostalCode,
+                            servicePointId: shippingMethod === "service_point"
+                                ? selectedServicePointId
+                                : null
+                        }
+                    })
                 })
             });
 
@@ -124,9 +291,92 @@ function CheckoutPage() {
 
 
             <div className="checkout-total">
-
-                <p>Total: {convertPrice(totalPrice).toFixed(2)} {currency}</p>
+                <p>Products: {convertPrice(totalPrice).toFixed(2)} {currency}</p>
+                <p>Shipping: {convertPrice(shippingPrice).toFixed(2)} {currency}</p>
+                <p>Total including shipping: {convertPrice(totalPrice + shippingPrice).toFixed(2)} {currency}</p>
             </div>
+
+            {hasMerch && !clientSecret && (
+                <section className="checkout-shipping">
+                    <h2>Delivery</h2>
+
+                    <label>
+                        Postal code
+                        <input
+                            type="text"
+                            value={postalCode}
+                            onChange={handlePostalCodeChange}
+                            placeholder="633 54"
+                            inputMode="numeric"
+                            disabled={Boolean(clientSecret)}
+                        />
+                    </label>
+
+                    {validPostalCode && (
+                        <>
+                            <fieldset>
+                                <legend>Delivery method</legend>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="shipping-method"
+                                        value="service_point"
+                                        checked={shippingMethod === "service_point"}
+                                        onChange={() => handleShippingMethodChange("service_point")}
+                                        disabled={Boolean(clientSecret)}
+                                    />
+                                    PostNord Service Point ({convertPrice(totalPrice >= 500 ? 0 : 59).toFixed(2)} {currency})
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="shipping-method"
+                                        value="home_delivery"
+                                        checked={shippingMethod === "home_delivery"}
+                                        onChange={() => handleShippingMethodChange("home_delivery")}
+                                        disabled={Boolean(clientSecret)}
+                                    />
+                                    Home Delivery ({convertPrice(totalPrice >= 500 ? 0 : 99).toFixed(2)} {currency})
+                                </label>
+                            </fieldset>
+
+                            {totalPrice >= 500 && <p>Free shipping</p>}
+
+                            {shippingMethod === "service_point" && (
+                                <label>
+                                    Service point
+                                    <select
+                                        value={servicePointId}
+                                        onChange={(event) => {
+                                            setServicePointId(event.target.value);
+                                            setServicePointSelectionKey(shippingSelectionKey);
+                                        }}
+                                        disabled={showShippingLoading || Boolean(clientSecret)}
+                                    >
+                                        <option value="">Select a service point</option>
+                                        {visibleServicePoints.map((point) => (
+                                            <option key={point.id} value={point.id}>
+                                                {point.name} - {point.address}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            )}
+
+                            {showShippingLoading && <p>Loading service points...</p>}
+                            {showShippingError && <p>{showShippingError}</p>}
+                            {estimateLoading && <p>Loading delivery estimate...</p>}
+                            {estimateError && <p>{estimateError}</p>}
+                            {!estimateLoading && !estimateError && (
+                                <p>
+                                    Estimated delivery:{" "}
+                                    {visibleEstimate?.estimatedDeliveryDate || "No delivery estimate available"}
+                                </p>
+                            )}
+                        </>
+                    )}
+                </section>
+            )}
 
             {error && (<p>{error}</p>)}
 
@@ -135,7 +385,11 @@ function CheckoutPage() {
                     <EmbeddedCheckout />
                 </EmbeddedCheckoutProvider>
             ):(
-                <button type = "button" onClick = {handlePlaceOrder} disabled = {isSubmitting}>
+                <button
+                    type="button"
+                    onClick={handlePlaceOrder}
+                    disabled={isSubmitting || !shippingSelectionIsValid}
+                >
                     {isSubmitting ? "Starting Checkout" : "Proceed to payment"}
                 </button>
             )}
