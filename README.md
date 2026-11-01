@@ -3,9 +3,7 @@
 ## About
 Wunju Store är ett första utkast till en e-handel där jag på sikt vill sälja min egen musik under alias 'Wunju', samt eventuell framtida merchandise.
 
-Projektet har utvecklats inom ramen för utbildningen Fullstack Developer och tre laborationer med fokus på externa API, dataintegration, sökfunktionalitet och betalningar.
-
-Fokus har legat på backend, databaslogik och fungerande integrationer snarare än visuell design. Gränssnittet är därför fortfarande relativt enkelt och stora delar av CSS-koden har genererats med hjälp av AI.
+Fokus har legat på backend, databaslogik och fungerande integrationer mycket snarare än visuell design, så jag försöker fokusera på att lägga så mycket av tiden som möjligt på att försöka förstå de funktionella systemen. Gränssnittet är därför fortfarande relativt enkelt och stora delar av CSS-koden har genererats med hjälp av AI.
 
 ## Live site
 Frontend: https://client-ten-topaz-75.vercel.app
@@ -49,6 +47,9 @@ Password: 123
 2. npm install --prefix client
 3. configure .env
 4. npm run dev
+
+- Kopiera .env.example till .env i projektets rotmapp och fyll i egna testnycklar och databasuppgifter.
+
 
 ## Database
 Databasen hålls minimal i detta första utkast.
@@ -353,7 +354,6 @@ Jag utökade 'SupplierImportPanel.jsx' med bilduppladdning, ersättning, borttag
 ## Fortfarande kvar att göra
 
 - Verifiering av felhantering vid avbrott i Supabase.
-- Deployment och testning i produktionsmiljön.
 - Ersätta det tillfälliga 'localOnly''-skyddet med riktig adminbehörighet innan uppladdning tillåts till produktion.
 
 
@@ -563,3 +563,38 @@ Blockera gärna också betalningsknappen om ogiltiga värden/alternativ angetts.
 #### Korrigeringar:
 - Copilot använde sig av 'FRONTEND_URL' vilket gav fel vid checkout > payment. 
 Ändrade manuellt till den lokala 'CLIENT_URL' istället.
+
+
+
+
+## Reflektion kring inlämningsuppgift: Integration med tredjepartssystem
+
+### 1- Integrationsmodeller
+
+Jag använder olika integrationsmodeller beroende på tjänst. Leverantörens produktdata hämtas som CSV/XML och behandlsa i backend. Algolia använder ett SDK för sökning och index, Stripe använder SDK, embedded checkout och webhooks för betalningsflöde, och Supabase Storage använder SDK för bildhanteringen. PostNord använder REST-API för ombud och leveransprognoser.
+Modellerna passar eftersom varje tjänst får hantera det den är specialiserad på, medan express och postgreSQL står för shoppens egna data/logik.
+
+### 2- Varför via express?
+
+Alla externa anrop går via express för att hålla API-nycklar hemliga och samla validering, felhantering osv på ett ställe. Frontend behöver bara kommunicera med mitt egna API.
+Det är särskilt viktigt för Stripe och PostNord, eftersom priserna alltid ska beräknas på servern och inte kunna manipuleras från frontend.
+
+### 3- Varför inte bygga allt själv?
+
+Att själv bygga en sökmotor, betallösning och molnlagring skulle kräva betydligt mer tid, säkerhetsarbete och underhåll. PostNord har dessutom ombuds- och leveransdata som jag inte själv har tillgång till.
+Leverantörsimporten gör produktuppdateringar som jag skulle behöva göra manuellt. Integrationerna låter mig fokusera på själva webbshoppen (vilket har behövts..).
+
+### 4- Om tjänsterna slutar fungera
+
+Om leverantör-API'na ligger nere misslyckas nya importer, men befintliga produkter finns kvar. Om Algolia inte svarar påverkas sökningen, men den vanliga produktlistan fungerar fortfarande via databasen.
+Om Stripe inte fungerar kan betalningar inte slutföras. Om supabase där bilderna förvaras ligger nere kan bildanvändningen misslyckas, och om PostNord inte svarar kan ombud och leveransprognoser inte hämtas.
+Jag har därför implementerat validering, timeouts och felhantering för att undvika att externa fel kraschar hela webplatsen.
+
+### 5- Risker och lärdomar
+
+Externa tjänster innebär ju beroenden. API'n, priser och villkor kan ändras, och hantering av betalnings och leveransuppgifter innebär säkerhetsrisker och integritetsrisker (något jag skulle vilja dyka lite djupare i).
+Genom att separera integrationerna i egna adaptrar blir de enklare att underhålla eller byta ut. Modularitet is key.
+
+Min största lärdom är att integrationer inte bara har att göra med API-anrop. Säkerhet, datavalidering, felhantering och en tydlig ansvarsfördelning är minst lika viktiga!!
+
+Tack för denna uppgift.
