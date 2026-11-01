@@ -18,6 +18,7 @@ import searchRoutes from "./routes/searchRoutes.js";
 import adminProductRoutes from "./routes/adminProductRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
 import stripeWebhookRoutes from "./routes/stripeWebhookRoutes.js";
+import shippingRoutes from "./routes/shippingRoutes.js";
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/shipping", shippingRoutes);
 
 
 

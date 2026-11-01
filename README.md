@@ -355,3 +355,72 @@ Jag utökade 'SupplierImportPanel.jsx' med bilduppladdning, ersättning, borttag
 - Verifiering av felhantering vid avbrott i Supabase.
 - Deployment och testning i produktionsmiljön.
 - Ersätta det tillfälliga 'localOnly''-skyddet med riktig adminbehörighet innan uppladdning tillåts till produktion.
+
+
+# Labb 5 – Postnord Shipping
+
+## Prompts och korrigeringar
+
+**Prompt 1**- (shippingAdapter.js): "Hej! i shippingAdapter.js har jag påbörjat ett zod-schema som heter PostNordAnswers. Implementera schemat så det denna struktur från postnords Json-response: 
+- servicePointInformationResponse: ett objekt som innehåller:
+- servicePoints: en array med objekt, som i sin tur innehåller servicPointId(string), name (string), och visitingAdress(objekt).
+-visitingAdress innehåller streetName, streetNumber, postalCode och city (samtliga är strings)"
+### Inga korrigeringar
+-----
+
+**Prompt 2**- (shippingAdapter.js): "Använd postNordAnswer.safeParse() för att validera resultatet från response.json, innan det används i findServicePoints(). Implementera även enkel felhantering ifall valideringen misslyckas"
+### Inga korrigeringar
+-----
+
+**Prompt 3**- (shippingService.js): "Skapa services/ shippingService.js
+i shippingService.js, definiera två shippingmethods: "service_point" och home_delivery", där frakt till ett ombud kostar 59kr och hemleverans kostar 99kr
+skapa två metoder: "validateShippingSelection (method, subtotal)" som returnerar fraktpriset, samt "validateShippingSelection(method, postalCode, servicePointId, subtotal)", som returnerar validerat faktobjekt med method, price och servicePoint"
+### Korrigeringar:
+#### Korrigering 1.
+*jag missade lägga till "gratis frakt" i prompten, samt blev koden rätt stökig då copilot blandade sync/async-funktioner. La även till postnummervalidering i detta steg!*
+
+**Prompt 4**- (shippingService.js): "Lägg till i shippingService.js så att om "subtotal"" är lika med eller överstiger 500kr (eller motsvarande värde i annan valuta som projektet hanterar) blir frakten gratis. shippingService.js ska inte hämta produktpriser eller ordertotal från databas, den ska få en redan beräknad summa som argument. Kontrollera befintliga order- och checkout-tjänster och hur de hanterar pengar (kronor och ören) MEN GÖR INGA ÄNDRINGAR I DESSA."
+
+Gör även validateShippingSelection() till en async-funktion och använd await för findServicePoints(). Funktionen ska alltid returnera ett promise med ett fraktobjekt vid lyckad validering!
+
+Lägg även till postnummervalidering för svenska postnummer med fem siffror. Acceptera format med mellanslag, dvs t.ex "både 12345 och 123 45 med .trim. 
+Inkludera även postalCode i det returnerade fraktobjektet. Objektet ska alltså ha method, price, postalCode och servicePoint
+
+#### Korrigering 2. 
+*Då jag inte riktigt fattade vad copilot gjort vid "
+async function validateShippingSelection(method, ...args) {
+    if (args.length === 1) {
+        return {
+            method,
+            price: getShippingPrice(method, args[0]),
+            postalCode: null,
+            servicePoint: null
+        };
+    }
+    "
+rådfrågade jag ChatGPT hur jag exakt skulle tolka denna kod och om det fanns potentiella risker med den, fick jag svaret att "Funktionen kan returnera ett till synes validerat fraktobjekt utan att något postnummer eller ombudsval har validerats." * 
+ -----
+
+**Prompt 5**- (shippingService.js): "Utan att ändra anda filer än shippingService.js, gör detta:
+- exportera getShippingPrice().
+- ändra signaturen till async function validateShippingSelection(method, postalCode, servicePointId, subtotal).
+- Ta bort "...args" och all logik som hanterar olika antal argument.
+- ValidateShippingSelection() ska alltid kräva ett giltigt postnummer och returnera ett validerat fraktobjekt."
+ ----- 
+
+**Prompt 6** (shippingService.js): "i shippingService.js måste vi separera ansvaren somvalidateShippingSelection() idag har.
+
+ValidateShippingSelection ska vara en async funktion som tar parametrarna method, postalCode och servicePointId. Funktionen ska validera leveransmetoden och normalisera svenskt postnummer. Vid service_point, hämta ombud från postNord via findServicePoints() och validera ombuds-ID. Vid home_delivery, anrope INTE postnord. Returnera ett objekt med method, postalCode och servicePoint (inkludera inget fraktpris i return'en).
+
+Skapa en ny synkron funktion som heter calculateShippingPrice som tar emot parametrarna method och subtotal. Ombudsleverans ska fortfarande kosta 59kr och hemleveranse 99kr (gratis om subtotal >= 500kr). Validera metod och subtotal, och använd kronor som valuta. Denna funktion ska INTE kommunicera med postNord eller databas!
+
+visa den färdiga filen och berätta gärna kort om vad som ändrats!"
+
+** Prompt 7** - (shippingRoutes.js): "Skapa routes/shippingRoutes.js, och skapa GET /service-points som tar emot postalCode som parameter. Validera även här postnumret, och normalisera det innan anropet. Använd findServicePoints(postalCode) från shippingAdapter.js, och returnera ombuden som JSON. Returnera ochså relevant  HTTP-felkod om ogiltigt postnummereller om postnord inte kan nås/skickar ogiltigt svar. 
+Använd express router!
+
+Registrera också routen i server.js"
+
+
+
+
