@@ -3,24 +3,52 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 async function createCheckoutSession(order){
+    const subtotalInCents = Math.round(order.subtotal * 100);
+    const shippingPriceInCents = Math.round(order.shippingPrice * 100);
+    const orderTotalInCents = Math.round(order.orderTotal * 100);
+
+    if (
+        !Number.isFinite(subtotalInCents)
+        || !Number.isFinite(shippingPriceInCents)
+        || !Number.isFinite(orderTotalInCents)
+        || subtotalInCents < 0
+        || shippingPriceInCents < 0
+        || orderTotalInCents < 0
+        || subtotalInCents + shippingPriceInCents !== orderTotalInCents
+    ) {
+        throw new Error("INVALID_ORDER_TOTAL");
+    }
+
+    const lineItems = [
+        {
+            price_data:{
+                currency: "sek",
+                product_data: {
+                    name:`Products for order #${order.id}`
+                },
+                unit_amount: subtotalInCents
+            },
+            quantity: 1
+        }
+    ];
+
+    if (shippingPriceInCents > 0) {
+        lineItems.push({
+            price_data:{
+                currency: "sek",
+                product_data: {
+                    name: "Shipping"
+                },
+                unit_amount: shippingPriceInCents
+            },
+            quantity: 1
+        });
+    }
     
     const session = await stripe.checkout.sessions.create({
         mode: "payment",
         ui_mode:"embedded_page",
-        line_items: [
-            {
-                price_data:{
-                    currency: "sek",
-                    product_data: {
-                        name:`Order #${order.id}`
-                    },
-
-                    unit_amount: Math.round(order.orderTotal * 100)
-                },
-
-                quantity: 1
-            }
-        ],
+        line_items: lineItems,
 
         client_reference_id: String(order.id),
 
@@ -36,4 +64,8 @@ async function createCheckoutSession(order){
     return session;
 }
 
-export { stripe, createCheckoutSession };
+async function expireCheckoutSession(sessionId) {
+    return stripe.checkout.sessions.expire(sessionId);
+}
+
+export { stripe, createCheckoutSession, expireCheckoutSession };

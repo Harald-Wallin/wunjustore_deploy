@@ -6,8 +6,8 @@ const router = express.Router();
 router.post("/", async (req, res) => {
     try {
 
-        const {userId, cartItems} = req.body;
-        const checkout = await startCheckout(userId, cartItems);
+        const {userId, cartItems, shippingSelection} = req.body;
+        const checkout = await startCheckout(userId, cartItems, shippingSelection);
 
         res.status(201).json(checkout);
 
@@ -23,6 +23,16 @@ router.post("/", async (req, res) => {
         if (error.message === "INSUFFICIENT_STOCK"){
             return res.status(409).json({
                 error: "Insufficient stock"
+            });
+        }
+
+        if (
+            error.message === "INVALID_SHIPPING_METHOD"
+            || error.message === "INVALID_POSTAL_CODE"
+            || error.message === "INVALID_SERVICE_POINT"
+        ) {
+            return res.status(400).json({
+                error: "Invalid shipping selection"
             });
         }
 

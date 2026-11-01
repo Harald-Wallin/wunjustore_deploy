@@ -1,5 +1,6 @@
 import pool from "../database/db.js";
 import {z} from "zod";
+import { calculateShippingPrice } from "./shippingService.js";
 
 
 const cartItemSchema = z.object({
@@ -29,16 +30,8 @@ const cartSchema = z.array (cartItemSchema).min(1).refine(
     //Så om det finns en dublett = underkänd varukorg
 );
 
-async function createOrder(userId, cartItems) {
-
-    //Vailderar cart med Zod
-    const validation = cartSchema.safeParse(cartItems);
-
-    if(!validation.success){
-        throw new Error("Invalid cart");
-    }
-
-    cartItems = validation.data;
+async function createOrder(userId, cartItems, shippingSelection = null) {
+    cartItems = validateCart(cartItems);
 
     //delar upp cart efter beats och merch-types
     const beatItems = cartItems.filter((item) => item.productType === "beat");
@@ -123,22 +116,28 @@ async function createOrder(userId, cartItems) {
             return total + product.price * cartItem.quantity;//return här = skickar tillbaks nya värdet TILL NÄSTA VARV
         }, 0);
 
-        const orderTotal = beatsTotal + merchTotal;
+        const subtotal = Number((beatsTotal + merchTotal).toFixed(2));
+        const shippingPrice = merchItems.length > 0
+            ? calculateShippingPrice(shippingSelection?.method, subtotal)
+            : 0;
+        const orderTotal = Number((subtotal + shippingPrice).toFixed(2));
         
         //skapar ordern
         const orderResult = await client.query(`
             INSERT INTO orders (
             user_id,
+            subtotal,
             order_total
             )
-            VALUES ($1, $2)
+            VALUES ($1, $2, $3)
             RETURNING
             id,
             user_id AS "userId",
+            subtotal::float AS "subtotal",
             order_total::float AS "orderTotal",
             status,
             created_at AS "createdAt";
-            `,[userId, orderTotal]
+            `,[userId, subtotal, orderTotal]
         );
 
         const order = orderResult.rows[0];
@@ -173,6 +172,29 @@ async function createOrder(userId, cartItems) {
             ` ,[order.id, product.id, item.quantity, product.price]);
         }
 
+        if (merchItems.length > 0) {
+            await client.query(`
+                INSERT INTO order_shipping (
+                order_id,
+                method,
+                price,
+                postal_code,
+                service_point_id,
+                service_point_name,
+                service_point_address
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7);
+            `, [
+                order.id,
+                shippingSelection.method,
+                shippingPrice,
+                shippingSelection.postalCode,
+                shippingSelection.servicePoint?.id ?? null,
+                shippingSelection.servicePoint?.name ?? null,
+                shippingSelection.servicePoint?.address ?? null
+            ]);
+        }
+
         //Justera lagersaldo för fysiska merch-produkterna
         for (const item of merchItems){
 
@@ -185,14 +207,14 @@ async function createOrder(userId, cartItems) {
             `, [item.quantity, item.productId]);
 
             if (result.rows.length === 0){
-                throw new Error("We do not currently have your wished amount of this item in stock!")
+                throw new Error("INSUFFICIENT_STOCK");
             }
         }
 
         //om allt fungerar så..
         await client.query("COMMIT");
 
-        return {...order,items: beats};
+        return {...order, shippingPrice, items: beats};
 
     } catch (error) {
 
@@ -349,8 +371,13 @@ async function cancelOrder(orderId, sessionId = null){
                 SET status = 'cancelled'
                 WHERE id = $1
                 AND status = 'pending'
-                AND ((stripe_session_id IS NULL AND $2::text IS NULL)
-                OR stripe_session_id = $2)
+                AND (
+                    ($2::text IS NULL AND stripe_session_id IS NULL)
+                    OR ($2::text IS NOT NULL AND (
+                        stripe_session_id IS NULL
+                        OR stripe_session_id = $2
+                    ))
+                )
                 RETURNING id;`,
             [orderId, sessionId]);
 
@@ -399,4 +426,14 @@ async function markOrderAsPaid(orderId, sessionId){
     return result.rows.length > 0;
 }
 
-export { createOrder, getOrderById, getAllOrders, getOrdersByUserId, cancelOrder, markOrderAsPaid};
+function validateCart(cartItems) {
+    const result = cartSchema.safeParse(cartItems);
+
+    if (!result.success) {
+        throw new Error("INVALID_CART");
+    }
+
+    return result.data;
+}
+
+export { createOrder, getOrderById, getAllOrders, getOrdersByUserId, cancelOrder, markOrderAsPaid, validateCart};

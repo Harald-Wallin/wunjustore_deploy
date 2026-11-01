@@ -399,14 +399,15 @@ async function validateShippingSelection(method, ...args) {
     }
     "
 rådfrågade jag ChatGPT hur jag exakt skulle tolka denna kod och om det fanns potentiella risker med den, fick jag svaret att "Funktionen kan returnera ett till synes validerat fraktobjekt utan att något postnummer eller ombudsval har validerats." * 
- -----
+-----
 
 **Prompt 5**- (shippingService.js): "Utan att ändra anda filer än shippingService.js, gör detta:
 - exportera getShippingPrice().
 - ändra signaturen till async function validateShippingSelection(method, postalCode, servicePointId, subtotal).
 - Ta bort "...args" och all logik som hanterar olika antal argument.
 - ValidateShippingSelection() ska alltid kräva ett giltigt postnummer och returnera ett validerat fraktobjekt."
- ----- 
+### Inga korrigeringar
+----- 
 
 **Prompt 6** (shippingService.js): "i shippingService.js måste vi separera ansvaren somvalidateShippingSelection() idag har.
 
@@ -415,12 +416,106 @@ ValidateShippingSelection ska vara en async funktion som tar parametrarna method
 Skapa en ny synkron funktion som heter calculateShippingPrice som tar emot parametrarna method och subtotal. Ombudsleverans ska fortfarande kosta 59kr och hemleveranse 99kr (gratis om subtotal >= 500kr). Validera metod och subtotal, och använd kronor som valuta. Denna funktion ska INTE kommunicera med postNord eller databas!
 
 visa den färdiga filen och berätta gärna kort om vad som ändrats!"
+### Inga korrigeringar
+-----
 
 ** Prompt 7** - (shippingRoutes.js): "Skapa routes/shippingRoutes.js, och skapa GET /service-points som tar emot postalCode som parameter. Validera även här postnumret, och normalisera det innan anropet. Använd findServicePoints(postalCode) från shippingAdapter.js, och returnera ombuden som JSON. Returnera ochså relevant  HTTP-felkod om ogiltigt postnummereller om postnord inte kan nås/skickar ogiltigt svar. 
 Använd express router!
 
 Registrera också routen i server.js"
+### Inga korrigeringar
+-----
 
+ **Prompt 8** - (): "-Undersök den nuvarande databasstrukturen, sql-filerna och migrationerna och se hur de är strukturerade. Ändra ingen befintlig struktur.
+- Skapa sedan migrations/"005_add_order_subtotal_and_shipping.sql" och skriv SQL för att lägga till kolumnen 'subtotal' (Numeric 10,2) i tabellen 'orders'. Kolumnen måste tillåta NULLvärden. Lägg till en check-constraint som hindrar negativa subtotal-värden.
 
+- I samma fil, skriv även SQL för att skapa en ny tabell: order_shipping, med kolumnerna: order_id (INT Primary key references orders (id)), method (varchar 20 NOT NULL), price (Numeric (10,2) NOT NULL), postal_code (varchar 5 NOT NULL), service_point_id(varchar 50), service_point_name (text), service_point_address (text). Använd här order_id både som primary key och foreign key. 
 
+-Lägg även till check-constrains som hindrar att 'method' aldrig är något annat än service_point eller home_delivery, att 'price' aldrig är negativt, att postal_code innehåller exakt 5 siffror, att service_point's ombudsfält måste vara ifyllda med giltig input, och att om method = home_delivery så ska alla ombudsfält vara nullade. 
 
+Använd även BEGIN och COMMIT i queryn.
+
+Kör INTE migrationen automatiskt- det gör jag gärna manuellt
+"
+ #### Korrigering 1. 
+ AIn ville lägga in shippingdatan direkt i orders, men jag valde att skapa en ny tabell exklusiv för shippingdatan istället.
+-----
+
+**Prompt 9** - (checkoutService.js, orderService.js, checkoutRoutes.js): "- Utöka checkoutService.startCheckout() så att den kan ta emot kundens leveransval. Vid beställningar av merch ska validateShippingSelection() anropas innan ordertransaktion startar. Om en order endast innehåller beats ska frakt inte krävas. Låt inte heller klienten ange fraktpriser eller ordertotal!
+
+- i orderService.js, beräkna subtotal från databasens produktpriser och fraktpris med calculateShippingPrice() från shippingService.js. Räkna också ut orderTotal = subtotal + shippingPrice, och spara subtotal or order_total i 'orders'. 
+
+- Skapa en rad i order_shipping när ordern innehåller merch, men skippa detta ifall ordern endast innehåller beats. Sätt då också fraktpriset till 0. 
+Returnera också subtotal,shippingPrice och orderTotal i orderobjektet för Stripe att hantera. 
+
+Ändra endast de filer som behövs för att föra leveransvalet från checkout-route till orderflödet, och ändra ingen Stripe eller React-kod. "
+#### Korrigering 1.
+- AIn skapade en ny fil "checkoutRoute.js" vars innehåll var identiskt med "checkoutRoutes.js". Denna nya fil togs bort.
+- shippingRoutes.js duplicerade postnummervalideringen (regex). Åtgärdades i nästa prompt genom att återanvända normalizePostalCOde().
+------
+
+**Prompt 10** - (Stripe): "- Undersök befintlig implementation av stripeService.js, checkoutService.js, orderService.js och stripe-webhooks.
+- Skriv om stripeService.createCheckoutSession() så att produkttotalen skickas som en separat line_item baserad på order.subtotal, att fraktkostnaden skickas som en separat line_item när orderns shippingprice är större än 0. 
+
+- Omvandla även kronor till ören med Math.round vid stripe-anropet, men verifiera FÖRE anropet att summan av betalningsraderna motsvarar order.orderTotal i ören. LITA ALDRIG PÅ BELOPP FRÅN FRONTEND. 
+
+- I orderService.js om lagerreservationen misslyckas, använd felkoden "INSUFFICIENT_STOCK" så checkout-route kan returnera "409". 
+-----
+
+**Prompt 10** - (leveransprognostest):"Gör ett isolerat GET-test mot PostNords Transit Time v2 API. 
+Endpoint:https://atapi2.postnord.com/rest/transport/v2/transittime/addresstoaddress.
+apikey: process.env.POSTNORD_API:KEY
+startTime: 2026-11-02T08:00
+serviceCodes: 19
+originPostalCode: 17173
+originCountryCode: SE
+destinationPostalCode: 63354
+destinationCountryCode: SE
+
+ÄNDRA INGA FILER I SAMBAND MED DETTA!
+Skicka Accept: application/json
+Redovisa http-status och json-svar"
+
+### Inga korrigeringar
+-----
+
+**Prompt 11** - (integration av leveransprognos): "-Implementera postNord Transit Time 2 i vår backend.
+Endpoint: GET https://atapi2.postnord.com/rest/transport/v2/transittime/addresstoaddress
+
+verifierade query-parametrar:
+-apikey: process.env.POSTNORD_API_KEY
+-startTime: lokal svensk datum/tid då PostNord förväntas ta emot paketet, format YYYY-MM-DDTHH
+-serviceCodes: 19 för service_point, 17 för home_delivery
+-originPostalCode: avsändarens postnummer
+-originCountryCode: SE
+- destinationPostalCode: mottagarens postnummer
+- destinationCountryCode: SE
+
+Läs först shippingAdapter.js, shippingService.js och shippingRoutes.js och återanvänd deras struktur.
+Lägg till getDeliveryEstimate() i shippingAdapter.js som använder befintlig API-nyckel, har en timeout på 5sek, hanterar nätverksfel samt ogiltiga svar. API ska returnera en array med resultat, filtrera bort resultaten där isSupported !== true, isBookable !== true eller estimatedTimeOfArrival.timeOfArrival saknas.
+Matcha rätt service.basicServiceCode. 
+
+- Lägg till funktion i shippingService.js som validerar fraktmetod och mottagarpostnummer (genom de funktioner vi redan har), map'ar service_point till servicekod 19 och home_delivery till servicekod 17, anropar adaptern och återanvänder den postnummervalidering som redan finns. 
+
+Ändra ingen kod som inte behövs ändras, och kör inga externa API-tester automatiskt, och visa vilka filer du ändrat och hur man testar endpointen manuellt!"
+
+#### Korrigeringar:
+- shippingAdapter.js returnerar fel format (rådata istället för normaliserat datum).
+- 'startTIme' saknar minuter och överlämningstid.
+- Saknad serverkonfiguration = fel HTTP-status
+
+Korrigeringsprompt:
+"- i shippingAdapter.js ska getDeliveryEstimate() returnera en array med den befintliga normaliserade datumet. Lägg till service.name i zod-schemat, filtrera på isSupported === true, isBookable === true, rätt basicServiceCode och giltig timeOfArrival. 
+Vid fler resultat med samma prioritet, välj tidigaste ankomst. 
+
+-Returnera:
+{
+estimatedDeliveryDate: "YYYY-MM-DD",
+estimatedDeliveryTime: "YYYY-MM-DDTHH:mm",
+serviceName: "PostNord Service Point"
+}
+
+- i shippingService, GEnerera startTime i svensk lokal tid. Använd nästa vardag kl 08.00 som förenklad överlämningstid, med formatet YYYY-MM-DDTHH. 
+Hantera också lördag och söndag genom att välja måndag.
+
+- om POSTNORD_ORIGIN_POSTAL_CODE saknas/ogiltig, kasta ett fel. Låt inte det jkass
