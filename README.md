@@ -35,12 +35,14 @@ Vercel
 
 ## Test login
 Customer:
+Email: customer@test.com
 Username: USER
-Password: 123
+Password: customer123
 
 Admin:
+Email: admin@test.com
 Username: ADMIN
-Password: 123
+Password: admin123
 
 ## Run locally
 1. npm install
@@ -598,3 +600,17 @@ Genom att separera integrationerna i egna adaptrar blir de enklare att underhål
 Min största lärdom är att integrationer inte bara har att göra med API-anrop. Säkerhet, datavalidering, felhantering och en tydlig ansvarsfördelning är minst lika viktiga!!
 
 Tack för denna uppgift.
+
+
+## JWT implementation
+
+Efter inlämningsuppgift 1 (efter labb 5) implementerar jag riktig authentication med JWT. 
+
+1- Jag installerar:
+bcrypt (hashar lösenord)
+jsonwebtoken(JWT)
+cookie-parser(läser JWT cookien i express)
+med: *npm install bcrypt jsonwebtoken cookie-parser*
+
+2- Lägger *till JWT_SECRET=xxxx...* i lokal .env som jag slumpar fram med *node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"*
+

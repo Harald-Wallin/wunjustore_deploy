@@ -19,6 +19,7 @@ import adminProductRoutes from "./routes/adminProductRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
 import stripeWebhookRoutes from "./routes/stripeWebhookRoutes.js";
 import shippingRoutes from "./routes/shippingRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 app.use(
   cors({
     origin: CLIENT_URL,
+    credentials: true
   }),
 );
 
@@ -36,6 +38,7 @@ app.use(
 app.use("/api/stripe/webhook", stripeWebhookRoutes);
 
 app.use(express.json());
+
 
 app.get("/api/health", (request, response) => {
   response.status(200).json({
@@ -54,6 +57,8 @@ app.use("/api/search", searchRoutes);
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/shipping", shippingRoutes);
+app.use("/api/auth", authRoutes);
+
 
 
 
