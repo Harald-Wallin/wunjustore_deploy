@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 
 import pool from "../database/db.js";
 
+import { requireAuth } from "../middleware/requireAuth.js";
+
 const router = Router();
 
 router.post("/login", async (req, res) => {
@@ -33,9 +35,9 @@ router.post("/login", async (req, res) => {
 
         const user = result.rows[0];
 
-        //felmeddelande om email eller lösenord är fel
-        if (!user || !user.password_hash ||
-            !(await bcrypt.compare(password, user.password_hash))) {
+        //felmeddelande om email eller lösen är fel
+        if (!user || !user.password_hash || !(await bcrypt.compare(password, user.password_hash))){
+            
             return res.status(401).json({
                 message: "Incorrect email or password"
             });
@@ -78,5 +80,62 @@ router.post("/login", async (req, res) => {
         });
     }
 });
+
+//Här används requireAuth (som innehåller 'next();' )som en middleware 
+router.get("/me", requireAuth, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT
+                u.id,
+                u.user_name,
+                u.user_email,
+                r.role_name
+            FROM users u
+            JOIN user_roles r ON r.id = u.user_role_id
+            WHERE u.id = $1
+        `, [req.userId]);
+
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.status(401).json({
+                message: "User not found"
+            });
+        }
+
+        return res.json({
+            user: {
+                id: user.id,
+                name: user.user_name,
+                email: user.user_email,
+                role: user.role_name
+            }
+        });
+
+    } catch (error) {
+        console.error("Failed to fetch current user:", error);
+
+        return res.status(500).json({
+            message: "Failed to fetch user"
+        });
+    }
+});
+
+//rensar cookien i webläsaren
+router.post("/logout", (req, res) => {
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.clearCookie("access_token", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        path: "/"
+    });
+
+    return res.json({
+        message: "Logout successful"
+    });
+});
+
 
 export default router;

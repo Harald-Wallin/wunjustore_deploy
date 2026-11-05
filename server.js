@@ -3,9 +3,11 @@ import "dotenv/config";
 import express from "express";
 
 import {getSupplierCsv, getSupplierProductsFromCsv} from "./integrations/supplierAdapter.js";
-import { normalizeSupplierProduct } from "./integrations/normalizeSupplierProduct.js";
-import { SupplierProductSchema } from "./integrations/supplierProductSchema.js";
+//import { normalizeSupplierProduct } from "./integrations/normalizeSupplierProduct.js";
+//import { SupplierProductSchema } from "./integrations/supplierProductSchema.js";
 import { validateSupplierProducts } from "./integrations/validateSupplierProducts.js";
+
+import cookieParser from "cookie-parser";
 
 //Routes
 import albumRoutes from "./routes/albumRoutes.js";
@@ -38,7 +40,7 @@ app.use(
 app.use("/api/stripe/webhook", stripeWebhookRoutes);
 
 app.use(express.json());
-
+app.use(cookieParser());
 
 app.get("/api/health", (request, response) => {
   response.status(200).json({
@@ -46,6 +48,7 @@ app.get("/api/health", (request, response) => {
     message: "Beat Store API is running",
   });
 });
+
 
 app.use("/api/albums", albumRoutes);
 app.use("/api/orders", orderRoutes);
