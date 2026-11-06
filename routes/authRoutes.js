@@ -23,14 +23,14 @@ router.post("/login", async (req, res) => {
         //hämta användare och roll från databas
         const result = await pool.query(`
             SELECT
-                u.id,
-                u.user_name,
-                u.user_email,
-                u.password_hash,
-                r.role_name
-            FROM users u
-            JOIN user_roles r ON r.id = u.user_role_id
-            WHERE LOWER(u.user_email) = LOWER($1)
+                users.id,
+                users.user_name,
+                users.user_email,
+                users.password_hash,
+                user_roles.role_name
+            FROM users
+            JOIN user_roles ON user_roles.id = users.user_role_id
+            WHERE LOWER(users.user_email) = LOWER($1)
         `,[email.trim()]);
 
         const user = result.rows[0];

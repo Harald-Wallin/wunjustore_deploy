@@ -28,7 +28,7 @@ Vercel
 - Customer order history
 - Admin album/beat CRUD
 - Admin order overview
-- Fake customer/admin login
+- Login med JWT auth
 - Stripe embedded Checkout (test), webhook, order status and stock reservations
 - Supplier product import 
 - Admin product CRUD
@@ -36,12 +36,10 @@ Vercel
 ## Test login
 Customer:
 Email: customer@test.com
-Username: USER
 Password: customer123
 
 Admin:
 Email: admin@test.com
-Username: ADMIN
 Password: admin123
 
 ## Run locally
@@ -604,13 +602,15 @@ Tack för denna uppgift.
 
 ## JWT implementation
 
-Efter inlämningsuppgift 1 (efter labb 5) implementerar jag riktig authentication med JWT. 
+Efter Labb 5 ersatte jag den tidigare fejk-inloggningen med JWT-baserad autentisering.
 
-1- Jag installerar:
-bcrypt (hashar lösenord)
-jsonwebtoken(JWT)
-cookie-parser(läser JWT cookien i express)
-med: *npm install bcrypt jsonwebtoken cookie-parser*
+- bcrypt används för att hasha + verifiera lösenord i databasen
+- jsonwebtoken skapar JWT-tokens med 8 timmars varaktighet
+- JWT lagras som 'httpOnly'-cookie, som läses av express via en cookie-parser
 
-2- Lägger *till JWT_SECRET=xxxx...* i lokal .env som jag slumpar fram med *node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"*
+- Implementerade /api/auth/login, /me och /logout för inloggning och session-hantering
+- 'RequireAuth' verifierar JWT och identifierar användaren vid skyddade API-anrop
+- 'RequireAdmin' kontrollerar användarens roll mot databasen
+- En customer kan endast se sina egna ordrar, admin kan se alla ordar lagda
+
 

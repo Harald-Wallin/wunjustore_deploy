@@ -199,11 +199,11 @@ function CheckoutPage() {
             //anropa egen Express-backend
             const response = await fetch(`${API_URL}/api/checkout`, {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    userId: currentUser.id,
                     cartItems: checkoutItems,
                     ...(hasMerch && {
                         shippingSelection: {

@@ -21,7 +21,7 @@ export function requireAuth(req, res, next){
             { algorithms: ["HS256"] }
         );
 
-        //användarID från verifierad JWT
+        //användarID från verifierad JWT läggs till i req-objektet
         req.userId = payload.sub;
 
         //next, för att detta ska användas som en middleware
