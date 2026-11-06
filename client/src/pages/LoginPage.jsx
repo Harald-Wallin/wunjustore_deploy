@@ -1,93 +1,95 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import {useState} from "react";
+import {useNavigate, Link} from "react-router-dom";
+import {useUser} from "../context/UserContext.jsx";
 
-import { useUser } from "../context/UserContext.jsx";
-
-function LoginPage() {
+function LoginPage()
+{
     const navigate = useNavigate();
 
-    const {currentUser, selectUser} = useUser();
+    const { currentUser, login } = useUser();
 
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
+    async function handleLogin(event){
 
-    function handleLogin(event) {
         event.preventDefault();
 
-        //Ganska opetig login-fejkning, men ändå en login-fejkning..
-        const normalizedUsername = username.trim().toUpperCase();
-        if (
-            normalizedUsername === "USER" &&
-            password === "123"
-        ) {
-            selectUser("customer");
+        setError(null);
+        setIsSubmitting(true);
+
+        try {
+            await login(email.trim(), password);
+
             navigate("/");
-            return;
-        };
 
-        if (
-            normalizedUsername === "ADMIN" &&
-            password === "123"
-        ) {
-            selectUser("admin");
-            navigate("/");
-            return;
-        };
+        } catch (error) {
+            setError(error.message);
 
-        setError("Incorrect username or password");
-    };
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
-
-    return(
+    return (
         <section className="login-page">
 
             <h1>Login</h1>
 
             <div className="login-page_info">
-                <p>Fake login for demonstration purposes.</p>
+                <p><strong>Test accounts</strong></p>
 
-                <p>User login:<strong> USER / 123</strong></p>
-                <p>Admin login:<strong> ADMIN / 123</strong></p>
+                <p><strong>Customer:</strong></p>
+                <p>Email: customer@test.com</p>
+                <p>Password: customer123</p>
 
+                <p><strong>Admin:</strong></p>
+                <p>Email: admin@test.com</p>
+                <p>Password: admin123</p>
             </div>
-
 
             <form onSubmit={handleLogin}>
 
                 <label>
-                    Username
+                    Email
 
-                    <input type="text" value={username} onChange={
-                        (event) => setUsername(event.target.value)
-                    }/>
-
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        autoComplete="username"
+                        required
+                    />
                 </label>
-
 
                 <label>
                     Password
 
-                    <input type="password" value={password} onChange={  
-                        (event) => setPassword(event.target.value)
-                    }
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        autoComplete="current-password"
+                        required
                     />
                 </label>
 
+                <button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Logging in..." : "Login"}
+                </button>
 
-                <button type="submit">Login</button>
             </form>
 
             {error && (<p className="login-page_error">{error}</p>)}
 
             <Link to="/">Back</Link>
 
-            {currentUser && (<p>Currently logged in as:{" "}{currentUser.name}</p>)}
-            
+            {currentUser && (<p>Currently logged in as: {currentUser.name}</p>)}
+
         </section>
     );
-};
+}
 
 export default LoginPage;

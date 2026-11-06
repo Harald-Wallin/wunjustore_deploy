@@ -19,13 +19,32 @@ function OrderConfirmationPage() {
     const [error, setError] = useState(null);
 
 
+    
     useEffect(() => {
         let intervalId;
-        async function fetchOrder() {
-            try {
-                const response = await fetch(`${API_URL}/api/orders/${orderId}`);
+        let active = true;
+        let fetching = false;
+
+        async function fetchOrder(){
+
+            //Förhindra att flera requests körs samtidigt
+            if (!active || fetching){
+                return;
+            }
+
+            fetching = true;
+
+            try{
+                const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
+                    credentials: "include" //browser skickar med jwt-cookien
+                });
 
                 const data = await response.json();
+
+                //Om komponenten försvunnit ska vi inte uppdatera state
+                if (!active) {
+                    return;
+                }
 
                 if (!response.ok) {
                     throw new Error(data.message || "Could not fetch order");
@@ -40,19 +59,37 @@ function OrderConfirmationPage() {
 
             } catch (error){
 
-                console.error("Failed to fetch order:",error);
-                setError(error.message);
-            }finally {
-                setLoading(false);
+                if (active) {
+                    console.error("Failed to fetch order:",error);
+                    setError(error.message);
+
+                    //Stoppa polling om vi inte får läsa ordern
+                    if (error.message === "Access denied" ||
+                        error.message === "Not authenticated") {
+                        clearInterval(intervalId);
+                    }
+                }
+
+            } finally {
+                fetching = false;
+
+                if (active) {
+                    setLoading(false);
+                }
             };
         };
 
         fetchOrder();
 
         intervalId = setInterval(fetchOrder, 3000);
-        return () => clearInterval(intervalId);
+
+        return () => {
+            active = false;
+            clearInterval(intervalId);
+        };
 
     }, [orderId]);//re-rendas alltså varje gång orderId ändras
+
 
     //rensar kundkorgen vid lyckat genomfört köp
     useEffect(() => {

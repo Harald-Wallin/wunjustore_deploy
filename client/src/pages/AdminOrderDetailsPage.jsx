@@ -18,7 +18,9 @@ function AdminOrderDetailsPage() {
         async function fetchOrder() {
 
             try {
-                const response = await fetch(`${API_URL}/api/orders/${orderId}`);
+                const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
+                    credentials: "include"
+                });
 
                 const data = await response.json();
 

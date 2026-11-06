@@ -1,15 +1,23 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import {Navigate, Outlet}  from "react-router-dom";
+import {useUser} from "../context/UserContext.jsx";
 
-function RequireAdmin() {
-    const { currentUser } = useUser();
+function RequireAdmin(){
 
-    if (!currentUser) {
-        return <Navigate to="/login" replace />;;
+    const {currentUser, authLoading} = useUser();
+
+    if (authLoading){
+
+        return <p>Checking authentication...</p>;
     }
 
-    if (currentUser.role !== "admin") {
-         return <Navigate to="/" replace />;
+    if (!currentUser){
+
+        return <Navigate to="/login" replace />;
+    }
+
+    if(currentUser.role !== "admin"){
+        
+        return <Navigate to="/" replace />;
     }
 
     return <Outlet />;

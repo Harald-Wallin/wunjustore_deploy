@@ -1,6 +1,6 @@
 import {NavLink} from "react-router-dom";
-import { useUser } from "../context/UserContext";
-import { useCurrency } from "../context/CurrencyContext";
+import {useUser } from "../context/UserContext";
+import {useCurrency} from "../context/CurrencyContext";
 
 // Navigationskomponent till "sidorna" Home, BrowseMusic, About, Cart och Login
 //Jag använder NavLink (ej "link") för att senare kunna MARKERA vilken sida som användaren står på just nu.
@@ -8,12 +8,16 @@ import { useCurrency } from "../context/CurrencyContext";
 
 function Navbar(){
 
-    const{currentUser, selectUser} = useUser();
+    const {currentUser, logout} = useUser();
     const { currency, setCurrency } = useCurrency();
 
     //Om man loggar ut återgår userState till visitor
-    function handleLogout(){
-        selectUser("visitor")
+    async function handleLogout(){
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
 
     return(

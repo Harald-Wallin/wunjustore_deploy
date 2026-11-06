@@ -1,12 +1,21 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import {Navigate, Outlet}  from "react-router-dom";
+import {useUser} from "../context/UserContext.jsx";
 
-function RequireAuth() {
-    const { currentUser } = useUser();
+function RequireAuth(){
 
-    if (!currentUser) {return <Navigate to="/login" replace />;}
+    const {currentUser, authLoading} = useUser();
 
-    //outlet = remndera den childroute som matchade
+    if (authLoading){
+
+        return <p>Checking authentication...</p>;
+    }
+
+    if (!currentUser){
+
+        return <Navigate to="/login" replace />;
+    }
+
+    //outlet = rendera den childroute som matchade
     return <Outlet />;
 }
 

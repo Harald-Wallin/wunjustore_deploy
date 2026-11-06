@@ -28,19 +28,19 @@ Vercel
 - Customer order history
 - Admin album/beat CRUD
 - Admin order overview
-- Fake customer/admin login
+- Login med JWT auth
 - Stripe embedded Checkout (test), webhook, order status and stock reservations
 - Supplier product import 
 - Admin product CRUD
 
 ## Test login
 Customer:
-Username: USER
-Password: 123
+Email: customer@test.com
+Password: customer123
 
 Admin:
-Username: ADMIN
-Password: 123
+Email: admin@test.com
+Password: admin123
 
 ## Run locally
 1. npm install
@@ -598,3 +598,19 @@ Genom att separera integrationerna i egna adaptrar blir de enklare att underhål
 Min största lärdom är att integrationer inte bara har att göra med API-anrop. Säkerhet, datavalidering, felhantering och en tydlig ansvarsfördelning är minst lika viktiga!!
 
 Tack för denna uppgift.
+
+
+## JWT implementation
+
+Efter Labb 5 ersatte jag den tidigare fejk-inloggningen med JWT-baserad autentisering.
+
+- bcrypt används för att hasha + verifiera lösenord i databasen
+- jsonwebtoken skapar JWT-tokens med 8 timmars varaktighet
+- JWT lagras som 'httpOnly'-cookie, som läses av express via en cookie-parser
+
+- Implementerade /api/auth/login, /me och /logout för inloggning och session-hantering
+- 'RequireAuth' verifierar JWT och identifierar användaren vid skyddade API-anrop
+- 'RequireAdmin' kontrollerar användarens roll mot databasen
+- En customer kan endast se sina egna ordrar, admin kan se alla ordar lagda
+
+

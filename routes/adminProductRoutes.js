@@ -5,7 +5,8 @@ import multer from "multer";
 import { createProduct, updateProduct, deleteProduct, getProductBySku, updateProductImage, clearProductImage } from "../services/productService.js";
 import { indexProducts, deleteProductFromIndex } from "../integrations/searchAdapter.js";
 import {uploadProductImage, removeProductImage} from "../integrations/storageAdapter.js"
-import { localOnly } from "../middleware/localOnly.js";
+import { requireAuth } from "../middleware/requireAuth.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = express.Router();
 
@@ -26,8 +27,32 @@ const upload = multer({
     }
 })
 
-//Skydda alla admin-routes
-router.use(localOnly);
+//Kör Multer och hanterar eventuella uppladdningsfel
+function handleImageUpload(req, res, next) {
+
+    upload.single("image")(req, res, (error) => {
+
+        if (error) {
+
+            if (error.code === "LIMIT_FILE_SIZE") {
+                return res.status(400).json({
+                    error: "Image is bigger than 4MB"
+                });
+            }
+
+            return res.status(400).json({
+                error: error.message
+            });
+        }
+
+        next();
+    });
+}
+
+//kräver giltig JWT + adminbehörighet:
+//denna rad registrerar middleware som körs för alla routes efter denna rad, i 
+//just denna router!
+router.use(requireAuth, requireAdmin);
 
 //Validering av nya produkter
 const createProductSchema = z.object({
@@ -50,24 +75,7 @@ const updateProductSchema = z.object({
 
 
 //POST /api/admin/products/:sku/image
-router.post("/:sku/image", upload.single("image"), async (error, req, res, next) =>{
-    //Multer middleware!
-    //upload.single("image") = multer middleware! Endpoint förväntar sig en fil i ett form som heter "image"
-      
-    if (error){
-        if(error.code === "LIMIT_FILE_SIZE"){
-            return res.status(400).json({
-                error: "Image is bigger than 4MB"
-            })
-        }
-
-        return res.status(400).json({
-            error: error.message
-        })
-    }
-    next();
-    
-}, async (req, res, next) => {
+router.post("/:sku/image", handleImageUpload, async (req, res, next) => {
     //om ingen fil finns i uppladdningen
     if (!req.file){
 

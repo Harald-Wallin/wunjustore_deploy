@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {useEffect, useState} from "react";
+import {Link} from "react-router-dom";
 
 import API_URL from "../config/api";
 
-import { useUser } from "../context/UserContext.jsx";
-import { useCurrency } from "../context/CurrencyContext";
+import {useUser} from "../context/UserContext.jsx";
+import {useCurrency} from "../context/CurrencyContext";
 
-function CustomerOrdersPage() {
-    const { currentUser } = useUser();
+function CustomerOrdersPage(){
+
+    const {currentUser} = useUser();
     const {currency, convertPrice} = useCurrency();
 
     const [orders, setOrders] = useState([]);
@@ -16,9 +17,21 @@ function CustomerOrdersPage() {
 
 
     useEffect(() =>{
-        async function fetchOrders() {
-            try {
-                const response = await fetch(`${API_URL}/api/orders/user/${currentUser.id}`);
+
+        //AbortController används för att avbryta ett "Web Request" när/där det behövs, så att gamla anrop inte
+        //kan råka uppdatera state
+        const controller = new AbortController();
+
+        async function fetchOrders(){
+            setLoading(true);
+            setError(null);
+
+            try{
+
+                const response = await fetch(`${API_URL}/api/orders/me`, {
+                    credentials: "include",
+                    signal: controller.signal
+                });
 
                 const data = await response.json();
 
@@ -29,17 +42,24 @@ function CustomerOrdersPage() {
                 setOrders(data.orders);
 
             }catch (error){
-                console.error("Failed to fetch customer orders:",error);
-                setError(error.message);
+                if (error.name !== "AbortError") {
+                    console.error("Failed to fetch customer orders:",error);
+                    setError(error.message);
+                }
 
-            } finally {
-                setLoading(false);
+            } finally{
+
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             };
         };
 
         fetchOrders();
 
-    }, [currentUser.id]);
+        return () => controller.abort();
+
+    }, [currentUser?.id]);
 
 
     if (loading) {
