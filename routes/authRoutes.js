@@ -6,11 +6,12 @@ import pool from "../database/db.js";
 
 import { requireAuth } from "../middleware/requireAuth.js";
 import { randomBytes } from "node:crypto";
-import { getGoogleAuthorizeUrl } from "../integrations/googleAdapter.js";
+import { getGoogleAuthorizeUrl, exchangeGoogleCode } from "../integrations/googleAdapter.js";
+import { findOrCreateGoogleUser } from "../services/googleUserService.js";
 
 const router = Router();
 
-//"Externa" cookieinställningar så startrouten och callback får samma
+//"Externa" cookieinställningar så startrouten och callback får samma format
 const googleStateCookieOptions ={
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -18,8 +19,33 @@ const googleStateCookieOptions ={
     path: "/api/auth/google"
 };
 
+
+//Skapar Cookie- userId kommer från service efter kund skapats/hittats i databas
+function setAuthCookie(res, userId){
+
+    //skapar själva tokenet. 
+    const token = jwt.sign(
+        { sub: String(userId) },
+        process.env.JWT_SECRET,
+        { expiresIn: "8h", algorithm: "HS256" }
+    );
+
+    //I produktion använder vi secure + sameSite=none
+    const isProduction = process.env.NODE_ENV === "production";
+
+    //lägger token i res-svaret med instruktionen: spara en cookie med namnet access_token, och använd JWT'n
+    //som värde + dessa inställningar
+    res.cookie("access_token", token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        maxAge: 8 * 60 * 60 * 1000,
+        path: "/"
+    });
+}
+
 //"_req", understräck betyder att parametern inte kommer användas
-router.get("/google", (_req, res) =>{
+router.get("/google",(_req, res) =>{
 
     //slumpar fram ett string-värde, t.ex
     //"CQj9mPK5neruVR5Ax-Gy9hOdE6NCmOcISUMdCtvHUE8TApJ9ycGIo2cZk7KmjQt5o30O62vJ1N_BIhr8aUXa70"
@@ -35,7 +61,7 @@ router.get("/google", (_req, res) =>{
         });
     }
 
-    //spread operator som tar innehållet i googleStateCookieOptions och lägger till en timer
+    //spread operator (+ timer)
     res.cookie("google_oauth_state", state,{
         ...googleStateCookieOptions,
         maxAge: 10 * 60 * 1000
@@ -45,7 +71,7 @@ router.get("/google", (_req, res) =>{
 });
 
 //Googles svarsanrop
-router.get("/google/callback", (req, res) =>{
+router.get("/google/callback", async (req, res) =>{
 
     //console.log("GOOGLE CALLBACK REQ: ", req);
     console.log ("GOOGLE CALLBACK REQ.QUERY: ", req.query);
@@ -73,9 +99,39 @@ router.get("/google/callback", (req, res) =>{
         });
     }
 
-    return res.json({
-        message: "Google callback received and state matched."
-    });
+    let googleProfile;
+
+    try{
+
+        googleProfile = await exchangeGoogleCode(code);
+
+    }catch{
+
+        return res.status(502).json({message: "Could not complete Google login- please try again"});
+    }
+
+    try{
+
+        const userId = await findOrCreateGoogleUser(googleProfile);
+
+        if (userId === null){
+
+            return res.status(409).json({message: "An account already uses this email. Please use your existing sign-in method"});
+        }
+
+        //förbereder access_token-cookien
+        setAuthCookie(res, userId);
+
+        //navigerar användaren till startsidan efter inlogg. clientUrl från .env
+        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        //skickar svar med cookie + redirect
+        return res.redirect(clientUrl);
+
+    }catch{
+
+        return res.status(500).json({message: "Could not complete Google login. Please try again"});
+    }
+
 });
 
 router.post("/login", async (req, res) => {
@@ -113,24 +169,7 @@ router.post("/login", async (req, res) => {
             });
         }
 
-        // JWT identifierar användaren via befintligt users.id.
-        const token = jwt.sign(
-            { sub: String(user.id) },
-            process.env.JWT_SECRET,
-            { expiresIn: "8h", algorithm: "HS256" }
-        );
-
-        // I produktion använder vi Secure + SameSite=None
-        // eftersom Vercel och Render ligger på olika domäner.
-        const isProduction = process.env.NODE_ENV === "production";
-
-        res.cookie("access_token", token, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? "none" : "lax",
-            maxAge: 8 * 60 * 60 * 1000,
-            path: "/"
-        });
+        setAuthCookie(res, user.id);
 
         return res.status(200).json({
             message: "Login successful",

@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {useNavigate, Link} from "react-router-dom";
 import {useUser} from "../context/UserContext.jsx";
+import API_URL from "../config/api.js";
 
 function LoginPage()
 {
@@ -36,7 +37,7 @@ function LoginPage()
     return (
         <section className="login-page">
 
-            <h1>Login</h1>
+            <h1>Login with email</h1>
 
             <div className="login-page_info">
                 <p><strong>Test accounts</strong></p>
@@ -81,6 +82,8 @@ function LoginPage()
                 </button>
 
             </form>
+
+            <p><a href={`${API_URL}/api/auth/google`}>Sign in with Google instead</a></p>
 
             {error && (<p className="login-page_error">{error}</p>)}
 
