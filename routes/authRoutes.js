@@ -5,8 +5,38 @@ import jwt from "jsonwebtoken";
 import pool from "../database/db.js";
 
 import { requireAuth } from "../middleware/requireAuth.js";
+import { randomBytes } from "node:crypto";
+import { getGoogleAuthorizeUrl } from "../integrations/googleAdapter.js";
 
 const router = Router();
+
+//"_req", understräck betyder att parametern inte kommer användas
+router.get("/google", (_req, res) =>{
+
+    //slumpar fram ett string-värde, t.ex
+    //"CQj9mPK5neruVR5Ax-Gy9hOdE6NCmOcISUMdCtvHUE8TApJ9ycGIo2cZk7KmjQt5o30O62vJ1N_BIhr8aUXa70"
+    //State skickas till google-adressen och sparas i en kortlivad cookie 
+    const state = randomBytes(32).toString("base64url");
+    const googleUrl = getGoogleAuthorizeUrl(state);
+
+    //console.log(state);
+
+    if (!googleUrl) {
+        return res.status(503).json({
+            message: "Google login is currently unavailable"
+        });
+    }
+
+    res.cookie("google_oauth_state", state, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 10 * 60 * 1000,
+        path: "/api/auth/google"
+    });
+
+    return res.redirect(googleUrl);
+});
 
 router.post("/login", async (req, res) => {
     const {email, password} = req.body;
