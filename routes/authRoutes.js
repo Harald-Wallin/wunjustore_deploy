@@ -11,6 +11,17 @@ import { findOrCreateGoogleUser } from "../services/googleUserService.js";
 
 const router = Router();
 
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
+//gemensam rediret för google-fel
+function redirectGoogleLoginError(res, reason){
+
+    const loginUrl = new URL("/login", CLIENT_URL);
+    loginUrl.searchParams.set("googleError", reason);
+
+    return res.redirect(loginUrl.toString());
+}
+
 //"Externa" cookieinställningar så startrouten och callback får samma format
 const googleStateCookieOptions ={
     httpOnly: true,
@@ -55,10 +66,8 @@ router.get("/google",(_req, res) =>{
 
     //console.log(state);
 
-    if (!googleUrl) {
-        return res.status(503).json({
-            message: "Google login is currently unavailable"
-        });
+    if (!googleUrl){
+        return redirectGoogleLoginError(res, "failed");
     }
 
     //spread operator (+ timer)
@@ -74,35 +83,32 @@ router.get("/google",(_req, res) =>{
 router.get("/google/callback", async (req, res) =>{
 
     //console.log("GOOGLE CALLBACK REQ: ", req);
-    console.log ("GOOGLE CALLBACK REQ.QUERY: ", req.query);
+    //console.log ("GOOGLE CALLBACK REQ.QUERY: ", req.query);
 
     const {code, state, error} = req.query;
     const expectedState = req.cookies.google_oauth_state;
 
     res.clearCookie("google_oauth_state", googleStateCookieOptions);
 
-    if (typeof state !== "string" || !state || state !== expectedState) {
-        return res.status(400).json({
-            message: "Google login could not be verified. Please try again."
-        });
+    if (typeof state !== "string" || !state || state !== expectedState){
+
+        return redirectGoogleLoginError(res, "invalid-state");
     }
 
-    if (error) {
-        return res.status(400).json({
-            message: "Google login was interrupted. Please try again."
-        });
+    
+    if(error){
+        //googles kod "access_denied" görs om till "cancelled", andra google-fel blir "failed"
+        const reason = error === "access_denied" ? "cancelled" : "failed";
+        return redirectGoogleLoginError(res, reason);
     }
 
-    if (typeof code !== "string" || !code) {
-        return res.status(400).json({
-            message: "Google did not return a login code."
-        });
+    if (typeof code !== "string" || !code){
+        return redirectGoogleLoginError(res, "failed");
     }
 
     let googleProfile;
 
     try{
-
         googleProfile = await exchangeGoogleCode(code);
 
     }catch{
@@ -115,21 +121,15 @@ router.get("/google/callback", async (req, res) =>{
         const userId = await findOrCreateGoogleUser(googleProfile);
 
         if (userId === null){
-
-            return res.status(409).json({message: "An account already uses this email. Please use your existing sign-in method"});
+            return redirectGoogleLoginError(res, "email-in-use");
         }
 
-        //förbereder access_token-cookien
         setAuthCookie(res, userId);
-
-        //navigerar användaren till startsidan efter inlogg. clientUrl från .env
-        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-        //skickar svar med cookie + redirect
-        return res.redirect(clientUrl);
+        return res.redirect(CLIENT_URL);
 
     }catch{
 
-        return res.status(500).json({message: "Could not complete Google login. Please try again"});
+        return redirectGoogleLoginError(res, "failed");
     }
 
 });
