@@ -1,6 +1,7 @@
 import {NavLink} from "react-router-dom";
 import {useUser } from "../context/UserContext";
 import {useCurrency} from "../context/CurrencyContext";
+import { useCart } from "../context/CartContext";
 
 // Navigationskomponent till "sidorna" Home, BrowseMusic, About, Cart och Login
 //Jag använder NavLink (ej "link") för att senare kunna MARKERA vilken sida som användaren står på just nu.
@@ -10,15 +11,20 @@ function Navbar(){
 
     const {currentUser, logout} = useUser();
     const { currency, setCurrency } = useCurrency();
+    const { clearCart } = useCart();
 
-    //Om man loggar ut återgår userState till visitor
+    //Om man loggar ut återgår userState till visitor + varukorg röms
     async function handleLogout(){
-        try {
-            await logout();
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    };
+    try{
+
+        await logout();
+        clearCart();
+        
+    } catch (error){
+        
+        console.error("Logout failed:", error);
+    }
+}
 
     return(
         <nav aria-label="Main navigation">

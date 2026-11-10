@@ -614,3 +614,43 @@ Efter Labb 5 ersatte jag den tidigare fejk-inloggningen med JWT-baserad autentis
 - En customer kan endast se sina egna ordrar, admin kan se alla ordar lagda
 
 
+# Labb 6– Inloggning med Google
+
+Kunder kan logga in med Google eller med shoppens äldre
+email + lösenordsinloggning. Båda flödena använder samma
+inloggningscookie och samma skydd för checkout och My Orders.
+
+## Inloggningsflöde
+
+Kunden klickar på **Sign in with Google**. Backend sparar ett random
+'state' i en cookie och skickar kunden till google. När kunden kommer
+tillbaka jämför backend 'state' med cookien och byter engångskoden mot
+tokens hos Google. Kunden hittas via Googles 'sub'(subject) eller skapas i
+databasen. Om email-adressen redan används får kunden använda sin
+befintliga inloggning.
+
+'State' används för att kontrollera att googles svar hör till
+inloggningen som startades i browsern och PKCE skyddar kodbytet genom
+att kräva en separat verifierare även om någon skulle komma över engångskoden.
+
+## Tokens och session
+
+Googles ID-token används på backend för att identifiera kunden. Den gäller
+i en timme och backend kontrollerar dess 'exp'. Googles access-token kan
+användas för google-APIer och dess återstående giltighet sätts i
+'expires_in'. Shoppen använder bara identitetsuppgifterna och tar bort
+googles tokens efter kodbytet.
+
+Jag återanvände projektets JWT eftersom lösenordsinloggningen redan använder
+den och samma middleware kan skydda API'et för båda inloggningssätten.
+Shoppens JWT gäller i åtta timmar och ligger i cookien 'access_token',
+som har httpOnly och även 'secure' i produktion. Utloggning rensar cookien
+i webbläsaren.
+
+## Fixar
+- Jag upptäckte att varorna i en inloggad kund fanns kvar efter att man loggat ut och kunde ses
+om jag loggade in med en annan användare. Jag åtgärdade det genom att lägga till 'clearCart()' i handleLogout() i Navbar.jsx. 
+
+- I produktion går API-anropen och google-callbacken via vercel, som
+skickar dem vidare till render. Browsern använder därmed shoppens
+domän för inloggningscookien!
