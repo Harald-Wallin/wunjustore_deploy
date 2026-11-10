@@ -1,6 +1,7 @@
 import {useState} from "react";
-import {useNavigate, Link} from "react-router-dom";
+import {useNavigate, Link, useSearchParams} from "react-router-dom";
 import {useUser} from "../context/UserContext.jsx";
+import API_URL from "../config/api.js";
 
 function LoginPage()
 {
@@ -12,6 +13,22 @@ function LoginPage()
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [searchParams] = useSearchParams();
+    const googleError = searchParams.get("googleError");
+    
+    let googleErrorMessage = null; 
+
+    //sätter mer begripliga felmeddelanden
+    if (googleError === "cancelled"){
+
+        googleErrorMessage = "Google sign-in was cancelled";
+    }else if (googleError){
+
+        googleErrorMessage = "Could not complete google sign-in. Please try again";
+    }
+    
+    const loginError = error || googleErrorMessage;
 
     async function handleLogin(event){
 
@@ -36,7 +53,7 @@ function LoginPage()
     return (
         <section className="login-page">
 
-            <h1>Login</h1>
+            <h1>Login with email</h1>
 
             <div className="login-page_info">
                 <p><strong>Test accounts</strong></p>
@@ -82,7 +99,9 @@ function LoginPage()
 
             </form>
 
-            {error && (<p className="login-page_error">{error}</p>)}
+            <p><a href={`${API_URL}/api/auth/google`}>Sign in with Google instead</a></p>
+
+            {loginError && (<p className="login-page_error" role="alert">{loginError}</p>)}
 
             <Link to="/">Back</Link>
 

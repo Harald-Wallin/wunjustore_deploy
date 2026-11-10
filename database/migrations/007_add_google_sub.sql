@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN google_sub TEXT UNIQUE;

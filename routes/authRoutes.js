@@ -5,8 +5,134 @@ import jwt from "jsonwebtoken";
 import pool from "../database/db.js";
 
 import { requireAuth } from "../middleware/requireAuth.js";
+import { randomBytes } from "node:crypto";
+import { getGoogleAuthorizeUrl, exchangeGoogleCode } from "../integrations/googleAdapter.js";
+import { findOrCreateGoogleUser } from "../services/googleUserService.js";
 
 const router = Router();
+
+//"Externa" cookieinställningar så startrouten och callback får samma format
+const googleStateCookieOptions ={
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/api/auth/google"
+};
+
+
+//Skapar Cookie- userId kommer från service efter kund skapats/hittats i databas
+function setAuthCookie(res, userId){
+
+    //skapar själva tokenet. 
+    const token = jwt.sign(
+        { sub: String(userId) },
+        process.env.JWT_SECRET,
+        { expiresIn: "8h", algorithm: "HS256" }
+    );
+
+    //I produktion använder vi secure + sameSite=none
+    const isProduction = process.env.NODE_ENV === "production";
+
+    //lägger token i res-svaret med instruktionen: spara en cookie med namnet access_token, och använd JWT'n
+    //som värde + dessa inställningar
+    res.cookie("access_token", token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        maxAge: 8 * 60 * 60 * 1000,
+        path: "/"
+    });
+}
+
+//"_req", understräck betyder att parametern inte kommer användas
+router.get("/google",(_req, res) =>{
+
+    //slumpar fram ett string-värde, t.ex
+    //"CQj9mPK5neruVR5Ax-Gy9hOdE6NCmOcISUMdCtvHUE8TApJ9ycGIo2cZk7KmjQt5o30O62vJ1N_BIhr8aUXa70"
+    //State skickas till google-adressen och sparas i en kortlivad cookie 
+    const state = randomBytes(32).toString("base64url");
+    const googleUrl = getGoogleAuthorizeUrl(state);
+
+    //console.log(state);
+
+    if (!googleUrl) {
+        return res.status(503).json({
+            message: "Google login is currently unavailable"
+        });
+    }
+
+    //spread operator (+ timer)
+    res.cookie("google_oauth_state", state,{
+        ...googleStateCookieOptions,
+        maxAge: 10 * 60 * 1000
+    });
+
+    return res.redirect(googleUrl);
+});
+
+//Googles svarsanrop
+router.get("/google/callback", async (req, res) =>{
+
+    //console.log("GOOGLE CALLBACK REQ: ", req);
+    console.log ("GOOGLE CALLBACK REQ.QUERY: ", req.query);
+
+    const {code, state, error} = req.query;
+    const expectedState = req.cookies.google_oauth_state;
+
+    res.clearCookie("google_oauth_state", googleStateCookieOptions);
+
+    if (typeof state !== "string" || !state || state !== expectedState) {
+        return res.status(400).json({
+            message: "Google login could not be verified. Please try again."
+        });
+    }
+
+    if (error) {
+        return res.status(400).json({
+            message: "Google login was interrupted. Please try again."
+        });
+    }
+
+    if (typeof code !== "string" || !code) {
+        return res.status(400).json({
+            message: "Google did not return a login code."
+        });
+    }
+
+    let googleProfile;
+
+    try{
+
+        googleProfile = await exchangeGoogleCode(code);
+
+    }catch{
+
+        return res.status(502).json({message: "Could not complete Google login- please try again"});
+    }
+
+    try{
+
+        const userId = await findOrCreateGoogleUser(googleProfile);
+
+        if (userId === null){
+
+            return res.status(409).json({message: "An account already uses this email. Please use your existing sign-in method"});
+        }
+
+        //förbereder access_token-cookien
+        setAuthCookie(res, userId);
+
+        //navigerar användaren till startsidan efter inlogg. clientUrl från .env
+        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+        //skickar svar med cookie + redirect
+        return res.redirect(clientUrl);
+
+    }catch{
+
+        return res.status(500).json({message: "Could not complete Google login. Please try again"});
+    }
+
+});
 
 router.post("/login", async (req, res) => {
     const {email, password} = req.body;
@@ -43,24 +169,7 @@ router.post("/login", async (req, res) => {
             });
         }
 
-        // JWT identifierar användaren via befintligt users.id.
-        const token = jwt.sign(
-            { sub: String(user.id) },
-            process.env.JWT_SECRET,
-            { expiresIn: "8h", algorithm: "HS256" }
-        );
-
-        // I produktion använder vi Secure + SameSite=None
-        // eftersom Vercel och Render ligger på olika domäner.
-        const isProduction = process.env.NODE_ENV === "production";
-
-        res.cookie("access_token", token, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? "none" : "lax",
-            maxAge: 8 * 60 * 60 * 1000,
-            path: "/"
-        });
+        setAuthCookie(res, user.id);
 
         return res.status(200).json({
             message: "Login successful",
