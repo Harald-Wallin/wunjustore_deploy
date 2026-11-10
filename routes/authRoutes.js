@@ -10,6 +10,14 @@ import { getGoogleAuthorizeUrl } from "../integrations/googleAdapter.js";
 
 const router = Router();
 
+//"Externa" cookieinställningar så startrouten och callback får samma
+const googleStateCookieOptions ={
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/api/auth/google"
+};
+
 //"_req", understräck betyder att parametern inte kommer användas
 router.get("/google", (_req, res) =>{
 
@@ -27,15 +35,47 @@ router.get("/google", (_req, res) =>{
         });
     }
 
-    res.cookie("google_oauth_state", state, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 10 * 60 * 1000,
-        path: "/api/auth/google"
+    //spread operator som tar innehållet i googleStateCookieOptions och lägger till en timer
+    res.cookie("google_oauth_state", state,{
+        ...googleStateCookieOptions,
+        maxAge: 10 * 60 * 1000
     });
 
     return res.redirect(googleUrl);
+});
+
+//Googles svarsanrop
+router.get("/google/callback", (req, res) =>{
+
+    //console.log("GOOGLE CALLBACK REQ: ", req);
+    console.log ("GOOGLE CALLBACK REQ.QUERY: ", req.query);
+
+    const {code, state, error} = req.query;
+    const expectedState = req.cookies.google_oauth_state;
+
+    res.clearCookie("google_oauth_state", googleStateCookieOptions);
+
+    if (typeof state !== "string" || !state || state !== expectedState) {
+        return res.status(400).json({
+            message: "Google login could not be verified. Please try again."
+        });
+    }
+
+    if (error) {
+        return res.status(400).json({
+            message: "Google login was interrupted. Please try again."
+        });
+    }
+
+    if (typeof code !== "string" || !code) {
+        return res.status(400).json({
+            message: "Google did not return a login code."
+        });
+    }
+
+    return res.json({
+        message: "Google callback received and state matched."
+    });
 });
 
 router.post("/login", async (req, res) => {
