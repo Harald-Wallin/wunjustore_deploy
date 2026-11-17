@@ -654,3 +654,13 @@ om jag loggade in med en annan användare. Jag åtgärdade det genom att lägga 
 - I produktion går API-anropen och google-callbacken via vercel, som
 skickar dem vidare till render. Browsern använder därmed shoppens
 domän för inloggningscookien!
+
+# Labb 7 – Admininlogg via Github
+---
+
+
+# Labb 8– Bekräftelse-email med Resend
+
+Bekräftelsemail vid genomfört köp.
+Implementerat med Resend's API. Utskicket sker i samband med att Stripe skickar sin
+signal/webhook då en betalning är bekräftat betald.
