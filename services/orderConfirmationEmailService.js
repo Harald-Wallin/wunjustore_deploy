@@ -21,7 +21,7 @@ export async function sendOrderConfirmation(orderId){
     }
 
     const subject = `Wunju Store – Order #${order.id}`;
-    const greeting = `Hello ${order.customer.name},`;
+    const greeting = `THANK YOU ${order.customer.name}, for supporting WUNJU!`;
     const total = `Total: ${order.orderTotal.toFixed(2)} SEK`;
 
     //gör en string per orderrad. Båda mailversionerna använder samma rader
@@ -35,7 +35,6 @@ export async function sendOrderConfirmation(orderId){
 
     const text = [
         greeting,
-        "THANK YOU for supporting WUNJU!",
         "",
         ...itemLines,
         "",
@@ -49,10 +48,10 @@ export async function sendOrderConfirmation(orderId){
     }).join("");
 
     const html = `
-        <h1>${escapeHtml(subject)}</h1>
-        <p><strong>${escapeHtml(greeting)}</strong></p>
+        <h1>${escapeHtml(greeting)}<h1>
         <ul>${htmlItems}</ul>
         <p><strong>${escapeHtml(total)}</strong></p>
+        <p>${escapeHtml(subject)}</p>
     `;
 
     const environment = process.env.NODE_ENV === "production" ? "production" : "development";
