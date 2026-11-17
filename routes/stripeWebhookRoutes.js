@@ -1,6 +1,7 @@
 import express from "express";
 import { stripe } from "../services/stripeService.js";
 import { markOrderAsPaid, cancelOrder } from "../services/orderService.js";
+import { sendOrderConfirmation } from "../services/orderConfirmationEmailService.js";
 
 const router = express.Router();
 
@@ -30,8 +31,22 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
             const session = event.data.object;
 
             if(session.payment_status === "paid"){
+                
+                //Hämtar orderID från session
                 const orderId = Number(session.client_reference_id);
-                await markOrderAsPaid(orderId, session.id);
+                const orderWasMarkedPaid = await markOrderAsPaid(orderId, session.id);
+
+                if (orderWasMarkedPaid){
+                    try{
+
+                        const emailId = await sendOrderConfirmation(orderId);
+                        console.info(`Order ${orderId}: Resend accepted email ${emailId}`);
+
+                    } catch(error){
+
+                        console.error(`Order ${orderId}: confirmation email failed`,error.message);
+                    }
+                }
             }
 
         } else if (event.type === "checkout.session.expired"){
