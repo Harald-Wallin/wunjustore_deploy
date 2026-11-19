@@ -138,3 +138,56 @@
     font-size: 0.9rem;
   }
 }
+
+.checkout-shortcut{
+    position: fixed;
+    top: 96px;
+    right: 10rem;
+    z-index: 100;
+
+    padding: 0.75rem 1.25rem;
+
+    background: #222;
+    color: #f5f5f5;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+
+    font-weight: 700;
+    text-decoration: none;
+
+    box-shadow: 0 4px 12px rgb(0 0 0 / 35%);
+}
+
+.checkout-shortcut:hover {
+    background: #303030;
+    border-color: #ffffff;
+}
+
+.checkout-shortcut:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+}
+
+.cart-Page_checkout-link{
+  padding: 0.75rem 1.25rem;
+
+    background: #222;
+    color: #f5f5f5;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+
+    font-weight: 700;
+    text-decoration: none;
+
+    box-shadow: 0 4px 12px rgb(0 0 0 / 35%);
+}
+
+.cart-Page_checkout-link:hover {
+    background: #303030;
+    border-color: #ffffff;
+}
+
+.cart-Page_checkout-link:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+}
