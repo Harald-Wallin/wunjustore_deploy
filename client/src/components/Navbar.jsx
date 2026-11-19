@@ -1,7 +1,7 @@
-import {NavLink} from "react-router-dom";
+import {NavLink, useLocation} from "react-router-dom";
 import {useUser } from "../context/UserContext";
-import {useCurrency} from "../context/CurrencyContext";
 import { useCart } from "../context/CartContext";
+import { currencySelector } from "./CurrencySelector";
 
 // Navigationskomponent till "sidorna" Home, BrowseMusic, About, Cart och Login
 //Jag använder NavLink (ej "link") för att senare kunna MARKERA vilken sida som användaren står på just nu.
@@ -10,8 +10,17 @@ import { useCart } from "../context/CartContext";
 function Navbar(){
 
     const {currentUser, logout} = useUser();
-    const { currency, setCurrency } = useCurrency();
     const { clearCart } = useCart();
+    const location = useLocation();
+
+    const showCurrency =
+    location.pathname === "/merch" ||
+    location.pathname === "/albums" ||
+    location.pathname.startsWith("/albums/") || //startsWith, då gäller även t.ex "/albums/5"
+    location.pathname === "/cart" ||
+    location.pathname === "/checkout";
+
+    console.log("Nuvarande sökväg:", location.pathname);
 
     //Om man loggar ut återgår userState till visitor + varukorg röms
     async function handleLogout(){
@@ -75,16 +84,8 @@ function Navbar(){
                     </>
                 )}
 
-                <li>
-                    <select value={currency}
-                        onChange={(event) => setCurrency(event.target.value)}>
-                        <option value="SEK">SEK</option>
-                        <option value="EUR">EUR</option>
-                        <option value="USD">USD</option>
-                        <option value="GOLD">WoW-Gold</option>
-                    </select>
-                </li>
- 
+                {/*Visar nu endast currency-dropdown på relevanta sidor*/}
+                {showCurrency && currencySelector()}
 
             </ul>
         </nav>

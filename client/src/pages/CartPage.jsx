@@ -59,14 +59,14 @@ function CartPage(){
                             Remove
                         </button>
                     </article>
-                ))};
+                ))}
             </div>
 
             {/*Totalbelopp + Checkout-länk. toFixed = konsant 2 decimaler*/}
             <div className="cart-total">
                 <p>Total: {convertPrice(totalPrice).toFixed(2)} {currency}</p>
 
-                <Link to="/checkout">
+                <Link to="/checkout" className ="cart-Page_checkout-link">
                     Checkout
                 </Link>
             </div>
